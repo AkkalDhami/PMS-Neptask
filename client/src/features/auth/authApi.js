@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const authApi = createApi({
@@ -7,7 +8,7 @@ const authApi = createApi({
         baseUrl: `${BASE_URL}/api/auth`,
         credentials: 'include',
     }),
-    tagTypes: ['Auth'], // used for cache invalidation
+    tagTypes: ['Auth'],
     endpoints: (builder) => ({
         register: builder.mutation({
             query: (data) => ({
@@ -56,12 +57,21 @@ const authApi = createApi({
             }),
         }),
 
+        resendOtp: builder.mutation({
+            query: (data) => ({
+                url: '/otp-resend',
+                method: 'POST',
+                body: data
+            }),
+        }),
+
         verifyOtp: builder.mutation({
-            query: ({ code }) => ({
+            query: ({ code, purpose = "", email }) => ({
                 url: '/otp-verify',
                 method: 'POST',
-                body: { code }
+                body: { code, purpose, email }
             }),
+            providesTags: ['Auth'],
         }),
 
         changePassword: builder.mutation({
@@ -77,7 +87,7 @@ const authApi = createApi({
                 url: '/profile',
                 method: 'GET',
             }),
-            providesTags: ['Auth'], // mark this query as providing 'Auth' tag
+            providesTags: ['Auth'],
         }),
 
         updateProfile: builder.mutation({
@@ -88,6 +98,14 @@ const authApi = createApi({
             }),
             invalidatesTags: ['Auth'],
         }),
+
+        googleLogin: builder.mutation({
+            query: (code) => ({
+                url: `/google-login`,
+                method: 'POST',
+                body: { code },
+            })
+        })
     }),
 });
 
@@ -101,7 +119,9 @@ export const {
     useUpdateProfileMutation,
     useGetuserProfileQuery,
     useVerifyOtpMutation,
-    useRequestOtpMutation
+    useRequestOtpMutation,
+    useResendOtpMutation,
+    useGoogleLoginMutation
 } = authApi;
 
 export default authApi;

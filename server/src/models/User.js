@@ -18,8 +18,16 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
         select: false
+    },
+    googleId: {
+        type: String,
+        default: null
+    },
+    loginMethod: {
+        type: String,
+        enum: ['manual', 'google', 'github'],
+        default: 'manual'
     },
     avatar: {
         url: String,

@@ -10,7 +10,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { Loader } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { LoginSchema } from "../../schemas/auth";
+import { useGoogleLoginMutation } from "../../features/auth/authApi";
 
 export function LoginForm({ className, onsubmit, ...props }) {
   const {
@@ -20,6 +22,28 @@ export function LoginForm({ className, onsubmit, ...props }) {
   } = useForm({
     resolver: zodResolver(LoginSchema),
     mode: "onTouched",
+  });
+
+  const [googleLogin, { isError, error }] = useGoogleLoginMutation();
+
+  console.log("rem: ", isError, error);
+  const responseGoogle = async (authResult) => {
+    try {
+      if (authResult.code) {
+        console.log(authResult);
+        const result = await googleLogin(authResult.code).unwrap();
+        console.log("Login success:", result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const googleLoginHandler = useGoogleLogin({
+    onSuccess: responseGoogle,
+    onError: responseGoogle,
+    redirect_uri: "http://localhost:5173/auth/callback",
+    flow: "auth-code",
   });
 
   const [apiError, setApiError] = useState(null);
@@ -32,6 +56,8 @@ export function LoginForm({ className, onsubmit, ...props }) {
       setApiError("Something went wrong. Please try again.");
     }
   };
+
+  if (isError) toast.error(error?.data?.message);
 
   return (
     <Card className={cn("gap-4", className)}>
@@ -107,7 +133,11 @@ export function LoginForm({ className, onsubmit, ...props }) {
                 <FaGithub />
                 Login with GitHub
               </Button>
-              <Button variant="outline" type="button" className="w-full">
+              <Button
+                onClick={googleLoginHandler}
+                variant="outline"
+                type="button"
+                className="w-full">
                 <FaGoogle />
                 Login with Google
               </Button>

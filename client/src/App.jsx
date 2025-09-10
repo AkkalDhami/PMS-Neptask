@@ -1,8 +1,10 @@
 import React from "react";
-import LandingPage from "./pages/others/LandingPage";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import LoginPage from "./pages/auth/LoginPage";
-import AppLayout from "./components/layout/AppLayout";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
@@ -10,7 +12,14 @@ import ChangePassword from "./pages/auth/ChangePassword";
 import Profile from "./pages/auth/ProfilePage";
 import PublicRoute from "./routes/PublicRoutes";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
-
+import EmailVerify from "./pages/auth/EmailVerify";
+import LandingPage from "./pages/others/LandingPage";
+import AppLayout from "./components/layout/AppLayout";
+import Workspace from "./pages/admin/Workspace";
+import Organization from "./pages/admin/Organization";
+{
+  /* <Navigate to="/login" replace /> */
+}
 const App = () => {
   const router = createBrowserRouter([
     {
@@ -43,6 +52,14 @@ const App = () => {
       ),
     },
     {
+      path: "/email-verify",
+      element: (
+        <ProtectedRoutes>
+          <EmailVerify />
+        </ProtectedRoutes>
+      ),
+    },
+    {
       path: "/change-password",
       element: (
         <ProtectedRoutes>
@@ -65,6 +82,19 @@ const App = () => {
           <ResetPassword />
         </PublicRoute>
       ),
+    },
+    {
+      element: <AppLayout />,
+      children: [
+        {
+          path: "/organization",
+          element: <Organization />,
+        },
+        {
+          path: "/workspace",
+          element: <Workspace />,
+        },
+      ],
     },
   ]);
 

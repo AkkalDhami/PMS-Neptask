@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "lucide-react";
 
-export default function OtpInput({ length = 6, onSubmit, isLoading }) {
+export default function OtpInput({ length = 6, onsubmit, isLoading }) {
   const [otp, setOtp] = useState(Array(length).fill(""));
   const inputRefs = useRef([]);
 
@@ -56,7 +56,7 @@ export default function OtpInput({ length = 6, onSubmit, isLoading }) {
       alert("Please enter complete OTP");
       return;
     }
-    onSubmit(otpValue);
+    onsubmit(otpValue);
   };
 
   return (

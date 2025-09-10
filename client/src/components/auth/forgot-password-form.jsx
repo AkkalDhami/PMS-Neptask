@@ -17,7 +17,13 @@ import toast from "react-hot-toast";
 import { ForgotPasswordSchema } from "../../schemas/auth";
 import { Loader } from "lucide-react";
 
-export function ForgotPasswordForm({ className, onsubmit, ...props }) {
+export function ForgotPasswordForm({
+  className,
+  onsubmit,
+  emailVerify = false,
+  changePassword = false,
+  ...props
+}) {
   const {
     register,
     handleSubmit,
@@ -37,22 +43,36 @@ export function ForgotPasswordForm({ className, onsubmit, ...props }) {
       setApiError("Something went wrong. Please try again.");
     }
   };
+
+  const handleEmailVerify = async (data) => {
+    try {
+      await onsubmit(data);
+    } catch (err) {
+      toast.error(err.message);
+      setApiError("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <>
       <Card className="gap-0">
         <CardHeader>
           <CardTitle>
             <h2 className="text-xl sm:text-2xl font-semibold">
-              Forgot Password?
+              {emailVerify ? "Email Verification" : "Forgot Password?"}
             </h2>
           </CardTitle>
           <CardDescription className="text-sm">
-            Enter your email and we'll send you link to reset your password
+            {emailVerify
+              ? " Enter your email and we'll send you otp to verify your email"
+              : " Enter your email and we'll send you link to reset your password"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form
-            onSubmit={handleSubmit(handleForgotFormSubmit)}
+            onSubmit={handleSubmit(
+              emailVerify ? handleEmailVerify : handleForgotFormSubmit
+            )}
             className={cn("flex flex-col gap-6", className)}
             {...props}>
             <div className="grid mt-2.5 gap-4">
@@ -82,16 +102,31 @@ export function ForgotPasswordForm({ className, onsubmit, ...props }) {
                     <Loader className="mr-2 h-6 w-6 animate-spin" />
                     {"Sending..."}
                   </>
+                ) : emailVerify ? (
+                  "Send OTP"
                 ) : (
                   "Send Reset Link"
                 )}
               </Button>
             </div>
             <div className="text-sm">
-              Remember your password ?{" "}
-              <Link to={"/login"} className="underline underline-offset-4">
-                Login
-              </Link>
+              {emailVerify ? (
+                <>
+                  Back to Profile ?{" "}
+                  <Link
+                    to={"/profile"}
+                    className="underline underline-offset-4">
+                    Profile
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Remember password ?{" "}
+                  <Link to={"/login"} className="underline underline-offset-4">
+                    Login
+                  </Link>
+                </>
+              )}
             </div>
           </form>
         </CardContent>
