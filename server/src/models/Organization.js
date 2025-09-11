@@ -11,6 +11,11 @@ const organizationSchema = new mongoose.Schema({
         url: String,
         public_id: String,
     },
+    orgEmail: {
+        type: String,
+        required: true,
+        unique: true
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -43,7 +48,10 @@ const organizationSchema = new mongoose.Schema({
             default: true
         }
     },
-    createdAt: { type: Date, default: Date.now }
+    workspaces: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Workspace"
+    }]
 }, { timestamps: true });
 
 const Organization = mongoose.model('Organization', organizationSchema);
