@@ -1,0 +1,58 @@
+<mjml>
+  <mj-head>
+    <mj-preview>You’ve been invited to join an organization</mj-preview>
+    <mj-font name="Inter" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Inter, Arial, sans-serif" />
+      <mj-button font-family="Inter, Arial, sans-serif" border-radius="8px" padding="20px" />
+    </mj-attributes>
+  </mj-head>
+
+  <mj-body background-color="#f5f7fb">
+
+    <!-- Hero -->
+    <mj-section background-color="#ffffff" padding="2px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="600" color="#111827">
+          You’ve been invited!
+        </mj-text>
+        <mj-text font-size="16px" color="#374151">
+          Hello <b>{{EMAIL}}</b>,
+        </mj-text>
+        <mj-text font-size="16px" color="#374151">
+          You have been invited by <b>{{INVITED_BY}}</b> to join the organization 
+          <b>{{ORG_NAME}}</b> as a <b>{{ROLE}}</b>.
+        </mj-text>
+        {{#if message}}
+          <mj-text font-size="16px" color="#4b5563" font-style="italic">
+            “{{MESSAGE}}”
+          </mj-text>
+        {{/if}}
+        <mj-button
+          href="{{INVITE_LINK}}"
+          background-color="#e0761fff"
+          color="#ffffff"
+          font-size="16px"
+          font-weight="600"
+        >
+          Accept Invitation
+        </mj-button>
+        <mj-text font-size="14px" color="gray" padding-top="10px">
+          This invitation will expire on <b>{{EXPIRES_AT}}</b>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <!-- Footer -->
+    <mj-section background-color="#f9fafb" padding="20px">
+      <mj-column>
+        <mj-text font-size="12px" color="gray">
+          If you weren’t expecting this invitation, you can safely ignore this email.
+        </mj-text>
+        <mj-text font-size="12px" color="gray">
+          © {{CURRENT_YEAR}} {{APP_NAME}}. All rights reserved.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
