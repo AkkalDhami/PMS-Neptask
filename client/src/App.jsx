@@ -17,6 +17,10 @@ import LandingPage from "./pages/others/LandingPage";
 import AppLayout from "./components/layout/AppLayout";
 import Workspace from "./pages/admin/Workspace";
 import Organization from "./pages/admin/Organization";
+import Project from "./pages/admin/Project";
+import Dashboard from "./pages/admin/Dashboard";
+import OrgDetails from "./pages/admin/OrgDetails";
+import AcceptInvitation from "./pages/admin/AcceptInvitation";
 {
   /* <Navigate to="/login" replace /> */
 }
@@ -91,10 +95,26 @@ const App = () => {
           element: <Organization />,
         },
         {
+          path: "/organization/:orgId",
+          element: <OrgDetails />,
+        },
+        {
+          path: "/dashboard",
+          element: <Dashboard />,
+        },
+        {
           path: "/workspace",
           element: <Workspace />,
         },
+        {
+          path: "/project",
+          element: <Project />,
+        },
       ],
+    },
+    {
+      path: "/invite/organization/:orgId/:token",
+      element: <AcceptInvitation />,
     },
   ]);
 
