@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-const nameSchema = z.string().trim()
+export const nameSchema = z.string().trim()
     .min(3, {
         message: "Name must be at least 3 characters long"
     })
@@ -8,7 +8,7 @@ const nameSchema = z.string().trim()
         message: "Name must be at most 50 characters long"
     });
 
-const passwordSchema = z.string().trim()
+export const passwordSchema = z.string().trim()
     .min(6, {
         message: "Password must be at least 6 characters long"
     })
