@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { getCookieOptions, signAccessToken } from '../utils/auth.js';
 import { ACCESS_TOKEN_EXPIRY } from '../constants/constant.js';
 import User from '../models/User.js';
+import { roles } from '../configs/roles.js';
 
 export async function authRequired(req, res, next) {
     try {
@@ -10,7 +11,7 @@ export async function authRequired(req, res, next) {
         if (refreshToken) {
             // console.log("refreshToken", refreshToken);
             const user = await User.findOne({ refreshToken })
-            console.log(user);
+
             const payload = {
                 _id: user._id,
                 name: user.name,
@@ -41,29 +42,16 @@ export async function authRequired(req, res, next) {
         req.user = payload;
         return next();
     } catch (error) {
-        console.log(error);
-        const isExpired = error && error.name === 'TokenExpiredError';
-        const refreshToken = req.cookies.refreshToken
-        if (refreshToken && isExpired) {
-            const accessSecret = process.env.JWT_ACCESS_SECRET || process.env.JWT_SECRET;
-
-            const payload = jwt.verify(refreshToken, accessSecret);
-            const accessToken = signAccessToken(payload);
-            res.cookie('accessToken', accessToken, {
-                ...getCookieOptions(),
-                maxAge: ACCESS_TOKEN_EXPIRY
-            });
-        }
+        console.error("Auth error:", error);
         return res.status(401).json({
             success: false,
-            message: isExpired ? 'Access token expired' : 'Invalid token',
-            refreshToken
+            message: error?.name === "TokenExpiredError" ? "Access token expired" : "Invalid token",
         });
     }
 }
 
 export function isAuthenticated(req, res, next) {
-    if (req?.user) return next();
+    if (req.user) return next();
     console.log("req.user".req?.user);
     return res.status(401).json({
         success: false,
@@ -71,14 +59,25 @@ export function isAuthenticated(req, res, next) {
     });
 }
 
-export const authorize = (...roles) => {
+export const authorize = (permission) => {
     return (req, res, next) => {
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({
+        const userRole = req.user?.role;
+
+        if (!userRole) {
+            return res.status(401).json({
                 success: false,
-                message: `User role ${req.user.role} is not authorized to access this route`
+                message: "Unauthorized"
             });
         }
+
+        const allowedPermissions = roles[userRole];
+        if (!allowedPermissions?.includes(permission)) {
+            return res.status(403).json({
+                success: false,
+                message: `Role ${userRole} is not allowed to perform: ${permission}`,
+            });
+        }
+
         next();
     };
 };
