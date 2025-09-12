@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Building2,
   Folder,
@@ -82,9 +83,18 @@ export function AppSidebar({ ...props }) {
               <>
                 {orgs?.orgs?.map((org) => (
                   <SelectItem key={org?._id} value={org._id}>
-                    <Badge className="h-6 min-w-6 rounded-md px-1 font-mono">
-                      {org.name?.charAt(0).toUpperCase()}
-                    </Badge>
+                    <Avatar className="h-8 w-8 font-medium rounded-lg">
+                      <AvatarImage
+                        src={org.logo?.url}
+                        className={"object-cover"}
+                      />
+                      <AvatarFallback
+                        className={
+                          "rounded-lg bg-primary dark:text-black text-white"
+                        }>
+                        {org?.name?.charAt(0)?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
                     {org.name}
                   </SelectItem>
                 ))}

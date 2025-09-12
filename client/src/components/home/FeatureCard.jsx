@@ -8,7 +8,7 @@ import {
 
 export default function FeatureCard({ feature }) {
   return (
-    <Card className="group relative w-full rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-950 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <Card className="group relative w-full rounded-2xl border border-zinc-500/40 bg-white hover:border-orange-500 dark:bg-slate-950 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       <CardHeader className="flex flex-col items-start gap-4">
         <div
           className={`w-14 h-14 rounded-lg flex items-center justify-center ${feature.color} transition-transform duration-300 group-hover:scale-110`}>
