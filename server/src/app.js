@@ -12,13 +12,16 @@ dotenv.config();
 
 import { connectToDatabase } from './configs/db.js';
 import { errorHandler } from './middlewares/errorHandler.js';
-import "./configs/google.js"
+import { safeSanitize } from './middlewares/safeSanitize.js';
+import "./configs/google.js";
+import "./jobs/orgCleanup.js";
 
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import orgRouter from './routes/orgRoutes.js';
 import inviteRouter from './routes/inviteRoutes.js';
-import { safeSanitize } from './middlewares/safeSanitize.js';
+import workspaceRouter from './routes/workspaceRoutes.js';
+import projectRouter from './routes/projectRoutes.js';
 
 const app = express();
 
@@ -37,18 +40,6 @@ app.use(express.json({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Sanitize data
-// app.use(safeSanitize);
-// app.use(
-//     mongoSanitize({
-//         onSanitize: ({ req, key }) => {
-//             console.warn(`This request[${key}] contained prohibited characters!`);
-//         },
-//         replaceWith: "_",
-//     })
-// );
-
-
 // Set security headers
 app.use(helmet());
 
@@ -64,10 +55,12 @@ app.use((req, res, next) => {
 //? ROUTES
 app.use('/api/auth', authRouter);
 app.use('/api/user', userRouter);
+app.use('/api/invite', inviteRouter);
 
 app.use('/api/org', orgRouter);
+app.use('/api/workspace', workspaceRouter);
+app.use('/api/project', projectRouter);
 
-app.use('/api/invite', inviteRouter);
 
 
 

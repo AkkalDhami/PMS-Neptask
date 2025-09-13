@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import Project from "./Project.js";
+import Organization from "./Organization.js";
 
 const workspaceSchema = new mongoose.Schema({
     name: {
@@ -19,15 +21,15 @@ const workspaceSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    tags: [String],
-    owner: {
+    admin: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
     organization: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Organization"
+        ref: "Organization",
+        required: true
     },
     members: [
         {
@@ -37,7 +39,7 @@ const workspaceSchema = new mongoose.Schema({
             },
             role: {
                 type: String,
-                enum: ["owner", "member", "admin", "viewer"],
+                enum: ["owner", "member", "admin", "viewer", "manager", 'guest'],
                 default: 'member'
             },
             joinedAt: {
@@ -49,7 +51,58 @@ const workspaceSchema = new mongoose.Schema({
     projects: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Project"
-    }]
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletionRequestedAt: {
+        type: Date,
+        default: null
+    },
+    scheduledDeletionAt: {
+        type: Date,
+        default: null
+    },
+    deletionReason: {
+        type: String,
+        trim: true,
+        maxlength: 500
+    },
+    deletionRequestedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    recoveredAt: {
+        type: Date,
+        default: null
+    },
+    recoveredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
 }, { timestamps: true });
 
-export default Workspace = mongoose.model("Workspace", workspaceSchema);
+workspaceSchema.pre("findOneAndDelete", async function (next) {
+    const workspaceId = this.getQuery()._id;
+    if (!workspaceId) return next();
+
+    await Project.deleteMany({ workspace: workspaceId });
+
+    await Organization.updateOne(
+        { workspaces: workspaceId },
+        { $pull: { workspaces: workspaceId } }
+    );
+
+    next();
+});
+
+// workspaceSchema.post("save", async function (doc) {
+//     await Organization.findByIdAndUpdate(doc.orgId, {
+//         $addToSet: { workspaces: doc._id } 
+//     });
+// });
+
+const Workspace = mongoose.model("Workspace", workspaceSchema);
+
+export default Workspace;
