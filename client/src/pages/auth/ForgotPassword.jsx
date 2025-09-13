@@ -26,29 +26,21 @@ const ForgotPassword = () => {
     setIsFormSubmit(true);
   };
   return (
-    <div className="grid min-h-svh">
-      <div className="flex  items-center justify-center gap-4 p-3 md:p-10">
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full mx-auto max-w-md">
-            {isFormSubmit ? (
-              <CheckEmail email={email} />
-            ) : (
-              <>
-                <AuthEmailForm
-                  schema={ForgotPasswordSchema}
-                  title="Forgot Password?"
-                  description="Enter your email and we'll send you a password reset link."
-                  buttonText="Send Reset Link"
-                  linkText="Remember password?"
-                  linkUrl="/login"
-                  linkLabel="Login"
-                  onSubmit={handleForgotPasswordSubmit}
-                />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="w-full mx-auto max-w-md">
+      {isFormSubmit ? (
+        <CheckEmail email={email} />
+      ) : (
+        <AuthEmailForm
+          schema={ForgotPasswordSchema}
+          title="Forgot Password?"
+          description="Enter your email and we'll send you a password reset link."
+          buttonText="Send Reset Link"
+          linkText="Remember password?"
+          linkUrl="/login"
+          linkLabel="Login"
+          onSubmit={handleForgotPasswordSubmit}
+        />
+      )}
     </div>
   );
 };

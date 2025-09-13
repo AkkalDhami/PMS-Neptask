@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 const ResetPassword = () => {
   const params = useParams();
   const navigate = useNavigate();
-  
+
   const [resetPassword] = useResetPasswordMutation();
   console.log(params);
 
@@ -28,14 +28,8 @@ const ResetPassword = () => {
     }
   };
   return (
-    <div className="grid min-h-svh">
-      <div className="flex  items-center justify-center gap-4 p-3 md:p-10">
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full mx-auto max-w-md">
-            <ResetPasswordForm onsubmit={handleResetPasswordForm} />
-          </div>
-        </div>
-      </div>
+    <div className="w-full mx-auto max-w-md">
+      <ResetPasswordForm onsubmit={handleResetPasswordForm} />
     </div>
   );
 };

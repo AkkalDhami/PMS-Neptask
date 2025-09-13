@@ -55,36 +55,23 @@ const EmailVerify = () => {
   };
 
   return (
-    <div className="grid min-h-svh">
-      <div className="flex  items-center justify-center gap-4 p-3 md:p-10">
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full mx-auto max-w-md">
-            {!isGettingEmail ? (
-              // <ForgotPasswordForm
-              //   onsubmit={handleGetEmail}
-              //   emailVerify={true}
-              // />
-              <AuthEmailForm
-                schema={VerifyEmailSchema}
-                title="Email Verification"
-                description="Enter your email and we'll send you an OTP."
-                buttonText="Send OTP"
-                linkText="Back to Profile?"
-                linkUrl="/profile"
-                linkLabel="Profile"
-                onSubmit={handleGetEmail}
-              />
-            ) : (
-              <>
-                <OtpInput
-                  isLoading={isLoading}
-                  onsubmit={handleEmailVerification}
-                />
-              </>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="w-full mx-auto max-w-md">
+      {!isGettingEmail ? (
+        <AuthEmailForm
+          schema={VerifyEmailSchema}
+          title="Email Verification"
+          description="Enter your email and we'll send you an OTP."
+          buttonText="Send OTP"
+          linkText="Back to Profile?"
+          linkUrl="/profile"
+          linkLabel="Profile"
+          onSubmit={handleGetEmail}
+        />
+      ) : (
+        <>
+          <OtpInput isLoading={isLoading} onsubmit={handleEmailVerification} />
+        </>
+      )}
     </div>
   );
 };
