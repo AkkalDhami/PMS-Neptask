@@ -1,9 +1,7 @@
-
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Users, Briefcase, Calendar, Crown, Calendar1 } from "lucide-react";
+import { Users, Briefcase, Calendar, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { dateFormater } from "../../utils/dateFormater";
 
@@ -22,29 +20,23 @@ const OrganizationCard = ({ organization }) => {
     }
   };
 
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <Card
-      onClick={() =>
-        navigate(
-          `/organization/${organization._id}`
-        )
-      }
-      className="w-full border border-zinc-500/50 hover:border-orange-500 cursor-pointer max-w-[340px] hover:shadow-lg transition-shadow">
+      onClick={() => navigate(`/organization/${organization._id}`)}
+      className={`w-full border border-zinc-500/50 hover:border-orange-600 ${
+        organization?.isDeleted
+          ? "border-red-500 bg-red-500/10 hover:border-red-600"
+          : ""
+      } cursor-pointer max-w-[340px] hover:shadow-lg transition-shadow`}>
       <CardHeader className="flex flex-row items-start space-y-0 gap-4">
         <Avatar className="h-12 w-12 rounded-lg">
-          <AvatarImage src={organization.logo?.url} className={'object-cover'} />
+          <AvatarImage
+            src={organization.logo?.url}
+            className={"object-cover"}
+          />
           <AvatarFallback
             className={"rounded-lg bg-primary dark:text-black text-white"}>
-            {getInitials(organization.name)}
+            {organization?.name?.charAt(0)?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
 

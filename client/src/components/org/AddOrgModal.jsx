@@ -10,20 +10,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CirclePlus, X, Loader, Edit, Edit2 } from "lucide-react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { orgSchema } from "../../schemas/org";
-import toast from "react-hot-toast";
+import { orgSchema, updateOrgSchema } from "../../schemas/org";
 
 const AddOrgModal = ({
   initialData = null,
@@ -36,7 +29,7 @@ const AddOrgModal = ({
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(orgSchema),
+    resolver: zodResolver(initialData ? updateOrgSchema : orgSchema),
     defaultValues: {
       name: initialData?.name || "",
       orgEmail: initialData?.orgEmail || "",
@@ -69,11 +62,9 @@ const AddOrgModal = ({
       if (logo) {
         fd.append("logo", logo);
       }
-
       await onsubmit(fd);
     } catch (err) {
       console.error(err);
-      toast.error(err?.message || "Something went wrong.");
       setApiError(err?.message || "Something went wrong. Please try again.");
     }
   };
@@ -118,17 +109,23 @@ const AddOrgModal = ({
           </div>
 
           {/* Email */}
-          <div className="grid gap-2">
-            <Label htmlFor="orgEmail">Organization Email *</Label>
-            <Input
-              id="orgEmail"
-              placeholder="example@email.com"
-              {...register("orgEmail")}
-            />
-            {errors.orgEmail && (
-              <p className="text-sm text-red-500">{errors.orgEmail.message}</p>
-            )}
-          </div>
+          {!initialData && (
+            <div className="grid gap-2">
+              <Label htmlFor="orgEmail">Organization Email *</Label>
+              <Input
+                disabled={initialData}
+                readOnly={initialData}
+                id="orgEmail"
+                placeholder="example@email.com"
+                {...register("orgEmail")}
+              />
+              {errors.orgEmail && (
+                <p className="text-sm text-red-500">
+                  {errors.orgEmail.message}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Logo */}
           <div className="grid gap-2">
@@ -165,7 +162,7 @@ const AddOrgModal = ({
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <Loader className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader className="h-5 w-5 animate-spin" />
                   {initialData ? "Updating..." : "Creating..."}
                 </>
               ) : (

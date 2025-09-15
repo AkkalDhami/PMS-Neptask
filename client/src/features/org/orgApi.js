@@ -14,7 +14,7 @@ const orgApi = createApi({
             query: () => '/',
             providesTags: ['Org']
         }),
-        
+
         getOrg: builder.query({
             query: (id) => `/${id}`,
             providesTags: ['Org']
@@ -30,18 +30,44 @@ const orgApi = createApi({
         }),
 
         deleteOrg: builder.mutation({
-            query: (id) => ({
-                url: `/delete/${id}`,
-                method: 'DELETE',
+            query: ({ orgId, reason }) => ({
+                url: `/${orgId}/delete-request`,
+                method: 'POST',
+                body: { reason },
+            }),
+            invalidatesTags: ['Org']
+        }),
+
+        recoverOrg: builder.mutation({
+            query: ({ orgId }) => ({
+                url: `/${orgId}/recover`,
+                method: 'POST',
             }),
             invalidatesTags: ['Org']
         }),
 
         updateOrg: builder.mutation({
-            query: ({ id, data }) => ({
-                url: `/update/${id}`,
+            query: ({ orgId, data }) => ({
+                url: `/update/${orgId}`,
                 method: 'PUT',
                 body: data,
+            }),
+            invalidatesTags: ['Org']
+        }),
+
+        removeMember: builder.mutation({
+            query: ({ orgId, memberId }) => ({
+                url: `/${orgId}/members/${memberId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Org']
+        }),
+
+        updateMemberRole: builder.mutation({
+            query: ({ orgId, memberId, role }) => ({
+                url: `/${orgId}/members/${memberId}`,
+                method: 'PUT',
+                body: { role }
             }),
             invalidatesTags: ['Org']
         }),
@@ -54,7 +80,10 @@ export const {
     useLazyGetOrgQuery,
     useCreateOrgMutation,
     useDeleteOrgMutation,
-    useUpdateOrgMutation
+    useUpdateOrgMutation,
+    useRemoveMemberMutation,
+    useUpdateMemberRoleMutation,
+    useRecoverOrgMutation
 } = orgApi;
 
 export default orgApi;

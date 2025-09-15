@@ -21,82 +21,109 @@ import Project from "./pages/admin/Project";
 import Dashboard from "./pages/admin/Dashboard";
 import OrgDetails from "./pages/admin/OrgDetails";
 import AcceptInvitation from "./pages/admin/AcceptInvitation";
+import ProfilePage from "./pages/admin/Userprofile";
+import WorkspaceDetailsPage from "./pages/admin/WorkspaceDetail";
+import Authlayout from "./components/layout/Authlayout";
+import ProjectDetailsPage from "./pages/admin/ProjectDetail";
+import CreateEditTaskPage from "./pages/admin/TaskCreatepage";
 {
   /* <Navigate to="/login" replace /> */
 }
 const App = () => {
   const router = createBrowserRouter([
     {
-      path: "/",
-      element: <LandingPage />,
-      errorElement: <div>Page Not Found</div>,
+      element: <Authlayout />,
+      children: [
+        {
+          path: "/",
+          element: <LandingPage />,
+          errorElement: <div>Page Not Found</div>,
+        },
+        {
+          path: "/login",
+          element: (
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          ),
+        },
+        {
+          path: "/signup",
+          element: (
+            <PublicRoute>
+              <SignupPage />
+            </PublicRoute>
+          ),
+        },
+        {
+          path: "/forgot-password",
+          element: (
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          ),
+        },
+        {
+          path: "/email-verify",
+          element: (
+            <ProtectedRoutes>
+              <EmailVerify />
+            </ProtectedRoutes>
+          ),
+        },
+        {
+          path: "/change-password",
+          element: (
+            <ProtectedRoutes>
+              <ChangePassword />
+            </ProtectedRoutes>
+          ),
+        },
+        {
+          path: "/profile",
+          element: (
+            <ProtectedRoutes>
+              <Profile />
+            </ProtectedRoutes>
+          ),
+        },
+        {
+          path: "/reset-password/:token",
+          element: (
+            <PublicRoute>
+              <ResetPassword />
+            </PublicRoute>
+          ),
+        },
+      ],
     },
-    {
-      path: "/login",
-      element: (
-        <PublicRoute>
-          <LoginPage />
-        </PublicRoute>
-      ),
-    },
-    {
-      path: "/signup",
-      element: (
-        <PublicRoute>
-          <SignupPage />
-        </PublicRoute>
-      ),
-    },
-    {
-      path: "/forgot-password",
-      element: (
-        <PublicRoute>
-          <ForgotPassword />
-        </PublicRoute>
-      ),
-    },
-    {
-      path: "/email-verify",
-      element: (
-        <ProtectedRoutes>
-          <EmailVerify />
-        </ProtectedRoutes>
-      ),
-    },
-    {
-      path: "/change-password",
-      element: (
-        <ProtectedRoutes>
-          <ChangePassword />
-        </ProtectedRoutes>
-      ),
-    },
-    {
-      path: "/profile",
-      element: (
-        <ProtectedRoutes>
-          <Profile />
-        </ProtectedRoutes>
-      ),
-    },
-    {
-      path: "/reset-password/:token",
-      element: (
-        <PublicRoute>
-          <ResetPassword />
-        </PublicRoute>
-      ),
-    },
+
     {
       element: <AppLayout />,
       children: [
         {
+          path: "/my-profile",
+          element: (
+            <ProtectedRoutes>
+              <ProfilePage />
+            </ProtectedRoutes>
+          ),
+        },
+        {
           path: "/organization",
-          element: <Organization />,
+          element: (
+            <ProtectedRoutes>
+              <Organization />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: "/organization/:orgId",
-          element: <OrgDetails />,
+          element: (
+            <ProtectedRoutes>
+              <OrgDetails />
+            </ProtectedRoutes>
+          ),
         },
         {
           path: "/dashboard",
@@ -107,8 +134,20 @@ const App = () => {
           element: <Workspace />,
         },
         {
+          path: "/workspace/:workspaceId",
+          element: <WorkspaceDetailsPage />,
+        },
+        {
           path: "/project",
           element: <Project />,
+        },
+        {
+          path: "/project/:projectId",
+          element: <ProjectDetailsPage />,
+        },
+        {
+          path: "/task-create",
+          element: <CreateEditTaskPage />,
         },
       ],
     },
