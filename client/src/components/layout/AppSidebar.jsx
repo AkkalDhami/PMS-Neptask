@@ -17,6 +17,7 @@ import {
   House,
   Layers,
   LucideLayoutDashboard,
+  User2,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -51,6 +52,11 @@ const data = {
       label: "Projects",
       url: "/project",
       icon: <Folder />,
+    },
+    {
+      label: "My Profile",
+      url: "/my-profile",
+      icon: <User2 />,
     },
   ],
 };
