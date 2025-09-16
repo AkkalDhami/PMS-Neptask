@@ -1,0 +1,118 @@
+<mjml>
+  <mj-head>
+    <mj-title>Task Overdue Notification</mj-title>
+    <mj-font
+      name="Inter"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <mj-attributes>
+      <mj-all font-family="Inter, Arial, sans-serif" line-height="1.5" />
+      <mj-text font-size="16px" color="#3A3A3A" />
+      <mj-button
+        background-color="#615EFC"
+        color="white"
+        border-radius="8px"
+        font-weight="600" />
+    </mj-attributes>
+  </mj-head>
+
+  <mj-body background-color="#F7F8FC">
+
+    <mj-wrapper
+      padding="2px 0"
+      background-color="#FFFFFF"
+      border-radius="12px">
+      <mj-section padding="10px 12px">
+        <mj-column>
+          <mj-text
+            font-size="24px"
+            font-weight="700"
+            color="#2D2D2D"
+            padding="10px 0">
+            Task Overdue Alert
+          </mj-text>
+
+          <mj-text font-size="18px" color="#555555" padding="10px 0">
+            Hello {{USERNAME}},
+          </mj-text>
+
+          <mj-text padding="10px 0">
+            This is a reminder that the following task is now overdue:
+          </mj-text>
+
+          <mj-divider
+            border-width="1px"
+            border-color="#EEEEEE"
+            padding="10px 0" />
+
+          <mj-table
+            font-size="14px"
+            cellpadding="6"
+            css-class="task-details"
+            style="margin-top: 8px; border-collapse: separate">
+            <tr>
+              <td class="label" style="padding: 8px 12px; min-width: 120px">
+                Task
+              </td>
+              <td class="value" style="padding: 8px 12px">{{TASK_TITLE}}</td>
+            </tr>
+            <tr>
+              <td class="label" style="padding: 8px 12px">Project</td>
+              <td class="value" style="padding: 8px 12px">{{PROJECT_NAME}}</td>
+            </tr>
+            <tr>
+              <td class="label" style="padding: 8px 12px">Due date</td>
+              <td class="value" style="padding: 8px 12px">{{DUE_DATE}}</td>
+            </tr>
+            <tr>
+              <td class="label" style="padding: 8px 12px">Priority</td>
+              <td class="value" style="padding: 8px 12px">{{PRIORITY}}</td>
+            </tr>
+            <tr>
+              <td class="label" style="padding: 8px 12px">Status</td>
+              <td class="value" style="padding: 8px 12px">{{STATUS}}</td>
+            </tr>
+            <tr>
+              <td class="label" style="padding: 8px 12px">Overdue by:</td>
+              <td class="value" style="padding: 8px 12px">{{OVERDUE_BY}}</td>
+            </tr>
+          </mj-table>
+
+          <mj-text padding="10px 0">
+            Please complete this task as soon as possible to avoid project
+            delays.
+          </mj-text>
+
+                  <mj-button
+                    href="{{PROJECT_LINK}}"
+                    padding="20px 0 10px 0">
+                    View Project Details
+                  </mj-button>
+                  <mj-button
+                    href="{{TASK_LINK}}"
+                    padding="20px 0 10px 0">
+                    View Task Details
+                  </mj-button>
+
+          <mj-text color="#777777" font-size="14px" padding="20px 0 10px 0">
+          If you think this notification is an error or you need help, contact your project admin: <a href="mailto:{{ADMIN_EMAIL}}" style="color:#2563EB; text-decoration:none;">{{ADMIN_EMAIL}}</a>
+      </mj-section>
+    </mj-wrapper>
+
+    <mj-section padding="30px 0 10px 0">
+      <mj-column>
+        <mj-text align="center" color="#777777" font-size="14px">
+          You're receiving this email because you're a member of the {{PROJECT_NAME}} project.
+        </mj-text>
+     
+        <mj-text
+          align="center"
+          color="#777777"
+          font-size="14px"
+          padding="20px 0 0 0">
+                  © {{CURR_YEAR}} {{APP_NAME}}. All rights reserved.
+        </mj-text>
+       
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
