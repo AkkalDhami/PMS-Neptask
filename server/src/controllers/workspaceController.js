@@ -177,7 +177,24 @@ export const getWorkspace = TryCatch(async (req, res) => {
         message: "Workspace not found!"
     });
 
-    const workspace = await Workspace.findById(workspaceId).populate("organization").populate("members.user").populate("admin").populate("projects");
+    const workspace = await Workspace.findById(workspaceId).populate("organization").populate("members.user").populate("admin")
+        .populate({
+            path: "projects",
+            populate: [
+                {
+                    path: "workspace",
+                    select: "name _id color"
+                },
+                {
+                    path: "members.user",
+                    select: "name _id role"
+                },
+                {
+                    path: "createdBy",
+                    select: "name _id"
+                },
+            ]
+        })
     if (!workspace) return res.status(401).json({
         success: false,
         message: "Workspace not found!"

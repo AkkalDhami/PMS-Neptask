@@ -102,6 +102,13 @@ const userSchema = new mongoose.Schema({
         default: "free",
     },
     lastLogin: Date,
+    points: {
+        type: Number,
+        default: 0
+    },
+    badges: {
+        type: String,
+    }
 }, { timestamps: true });
 
 userSchema.index({ email: 1 });
