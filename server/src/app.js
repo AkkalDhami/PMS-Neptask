@@ -15,6 +15,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { safeSanitize } from './middlewares/safeSanitize.js';
 import "./configs/google.js";
 import "./jobs/orgCleanup.js";
+// import "./jobs/taskRemainder.js";
 
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
@@ -22,6 +23,7 @@ import orgRouter from './routes/orgRoutes.js';
 import inviteRouter from './routes/inviteRoutes.js';
 import workspaceRouter from './routes/workspaceRoutes.js';
 import projectRouter from './routes/projectRoutes.js';
+import taskRouter from './routes/taskRoutes.js';
 
 const app = express();
 
@@ -60,6 +62,7 @@ app.use('/api/invite', inviteRouter);
 app.use('/api/org', orgRouter);
 app.use('/api/workspace', workspaceRouter);
 app.use('/api/project', projectRouter);
+app.use('/api/task', taskRouter);
 
 
 

@@ -13,7 +13,7 @@ export async function authRequired(req, res, next) {
             const user = await User.findOne({ refreshToken })
 
             const payload = {
-                _id: user._id,
+                _id: user?._id,
                 name: user.name,
                 email: user.email,
                 role: user.role

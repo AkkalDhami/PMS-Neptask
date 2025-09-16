@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Workspace from "./Workspace.js";
 
 const organizationSchema = new mongoose.Schema({
     name: {
@@ -29,7 +30,7 @@ const organizationSchema = new mongoose.Schema({
             },
             role: {
                 type: String,
-                enum: ["owner", "admin", "member", 'viewer', 'guest'],
+                enum: ["owner", "manager", "admin", "member", 'viewer', 'guest'],
                 default: "member"
             },
             joinedAt: { type: Date, default: Date.now }
@@ -51,8 +52,52 @@ const organizationSchema = new mongoose.Schema({
     workspaces: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Workspace"
-    }]
+    }],
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletionRequestedAt: {
+        type: Date,
+        default: null
+    },
+    scheduledDeletionAt: {
+        type: Date,
+        default: null
+    },
+    deletionReason: {
+        type: String,
+        trim: true,
+        maxlength: 500
+    },
+    deletionRequestedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    recoveredAt: {
+        type: Date,
+        default: null
+    }
 }, { timestamps: true });
+
+organizationSchema.index({ scheduledDeletionAt: 1 }, { expireAfterSeconds: 0 });
+
+// Middleware to exclude deleted organizations from queries
+// organizationSchema.pre(/^find/, function (next) {
+//     if (this.getFilter().isDeleted === undefined) {
+//         this.where({ isDeleted: false });
+//     }
+//     next();
+// });
+
+organizationSchema.pre("findOneAndDelete", async function (next) {
+    const orgId = this.getQuery()._id;
+    if (!orgId) return next();
+
+    await Workspace.deleteMany({ organization: orgId });
+
+    next();
+});
 
 const Organization = mongoose.model('Organization', organizationSchema);
 
