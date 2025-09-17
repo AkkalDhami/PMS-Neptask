@@ -26,9 +26,7 @@ import WorkspaceDetailsPage from "./pages/admin/WorkspaceDetail";
 import Authlayout from "./components/layout/Authlayout";
 import ProjectDetailsPage from "./pages/admin/ProjectDetail";
 import CreateEditTaskPage from "./pages/admin/TaskCreatepage";
-{
-  /* <Navigate to="/login" replace /> */
-}
+
 const App = () => {
   const router = createBrowserRouter([
     {
