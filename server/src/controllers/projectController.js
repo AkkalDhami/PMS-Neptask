@@ -262,6 +262,38 @@ export const getAllProjects = TryCatch(async (req, res) => {
     });
 });
 
+//? GET PROJECTS BY WORKSPACE
+export const getProjectsByWorkspace = TryCatch(async (req, res) => {
+    const { workspaceId } = req.params;
+    const {
+        page = 1,
+        limit = 10,
+    } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const projects = await Project.find({ workspace: workspaceId })
+        .populate('createdBy', 'name email')
+        .populate('workspace', 'name color')
+        .populate('members.user', 'name avatar email')
+        .populate('tasks')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await Project.countDocuments(filter);
+    res.status(200).json({
+        success: true,
+        projects,
+        pagination: {
+            page: Number(page),
+            limit: Number(limit),
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    })
+})
+
 //? GET PROJECTS
 export const getProjects = TryCatch(async (req, res) => {
     const projects = await Project.find().populate("members.user", "name email avatar").populate("workspace", "name color _id");
