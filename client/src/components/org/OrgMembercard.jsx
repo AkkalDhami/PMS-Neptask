@@ -90,7 +90,7 @@ const OrgMembercard = ({ member, orgId }) => {
           </DropdownMenuContent>
         </DropdownMenu>
         <DeleteAlertDialog
-          triggerText=""
+          triggerText="Delete oganization"
           title="Remove member from organization"
           isLoading={isLoading}
           onConfirm={() => removeMemberHandler({ memberId: member?.user?._id })}
