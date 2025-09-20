@@ -21,7 +21,6 @@ export async function requestOtp(req, res) {
 
         const user = await User.findOne({ email });
 
-        // Purpose-specific prechecks:
         if (purpose === "email-verify") {
             if (user?.isEmailVerified) {
                 return res.status(400).json({ success: false, message: "Email is already verified" });

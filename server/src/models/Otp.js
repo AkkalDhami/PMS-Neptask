@@ -10,7 +10,6 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: true,
         index: true,
-        // enum: [email - verify, password - reset, 2fa, login]
     },
     codeHash: {
         type: String,

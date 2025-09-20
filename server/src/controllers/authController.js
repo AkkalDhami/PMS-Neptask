@@ -165,12 +165,6 @@ export const forgotPassword = TryCatch(async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // const isEmailVerified = await User.findOne({ email, isEmailVerified: true });
-    // if (!isEmailVerified) return res.status(401).json({
-    //     success: false,
-    //     message: "Please verify your email first"
-    // });
-
     const { resetPasswordExpire, resetPasswordToken, resetToken } = generateResetPasswordToken();
     if (user) {
         user.resetPasswordExpire = resetPasswordExpire;
@@ -224,7 +218,6 @@ export const resetPassword = TryCatch(async (req, res) => {
         resetPasswordExpire: { $lt: new Date() },
     }).select('+password')
 
-    console.log(token, user);
 
     if (!user) return res.status(401).json({
         success: false,
