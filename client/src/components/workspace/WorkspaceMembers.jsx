@@ -5,14 +5,17 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardAction,
   CardFooter,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getRoleBadgeColor } from "../../utils/badgeColor";
 import { dateFormater } from "../../utils/dateFormater";
+import { AddMemberDialog } from "../admin/Form";
 
 const WorkspaceMembers = ({ members }) => {
+
   return (
     <Card>
       <CardHeader>
@@ -20,6 +23,9 @@ const WorkspaceMembers = ({ members }) => {
         <CardDescription>
           Manage members and their permissions in this workspace
         </CardDescription>
+        <CardAction>
+          <AddMemberDialog users={members} />
+        </CardAction>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">

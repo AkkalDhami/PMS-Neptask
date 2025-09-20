@@ -37,10 +37,11 @@ import {
   Building2,
   LucideUserCog2,
   SeparatorVertical,
+  ChevronLeft,
 } from "lucide-react";
 
 import WorkspaceAction from "../../components/workspace/WorkspaceAction";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetWorkspaceQuery } from "../../features/workspace/workspaceApi";
 import toast from "react-hot-toast";
 import { dateFormater } from "../../utils/dateFormater";
@@ -61,12 +62,16 @@ const WorkspaceDetailsPage = () => {
   } = useGetWorkspaceQuery(workspaceId);
   console.log(data);
 
+  const navigate = useNavigate();
+
   if (isLoadingWorkspace) {
     return (
       <div className="container mx-auto p-6 min-h-screen w-full flex items-center justify-center h-64">
         <div className="flex flex-col items-center">
           <RefreshCw className="h-8 w-8 animate-spin mb-4" />
-          <p>Loading workspace data...</p>
+          <p className="text-2xl bg-gradient text-transparent bg-clip-text font-medium">
+            Loading workspace data...
+          </p>
         </div>
       </div>
     );
@@ -105,8 +110,11 @@ const WorkspaceDetailsPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container sm:p-6">
+      <Button variant="outline" onClick={() => navigate(-1)}>
+        <ChevronLeft className="h-5 w-5" /> Go Back
+      </Button>
+      <div className="flex mt-3 justify-between items-center flex-wrap gap-3 mb-6">
         <div className="flex items-center space-x-4">
           <div
             className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"

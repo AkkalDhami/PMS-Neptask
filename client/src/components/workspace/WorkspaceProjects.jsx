@@ -9,18 +9,19 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
 import { Folder, Plus } from "lucide-react";
 import NotFound from "../admin/NotFound";
 import ProjectAction from "../project/ProjectAction";
 import ProjectCard from "../project/ProjectCard";
 
 const WorkspaceProjects = ({ projects = [] }) => {
+  console.log(projects);
   const { workspaceId } = useParams();
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-wrap items-center justify-between">
         <div>
           <CardTitle>Workspace Projects</CardTitle>
           <CardDescription className={"mt-2"}>
@@ -30,11 +31,12 @@ const WorkspaceProjects = ({ projects = [] }) => {
         <ProjectAction workspaceId={workspaceId} />
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="flex flex-wrap lg:grid lg:grid-cols-3 gap-4">
           {projects.map((project) => (
             <ProjectCard project={project} key={project._id} />
           ))}
-
+        </div>
+        <div className="flex items-center justify-center gap-4">
           {projects.length === 0 && (
             <NotFound
               title="No projects found!"

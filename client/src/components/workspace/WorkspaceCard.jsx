@@ -9,6 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
@@ -19,11 +24,6 @@ import {
 } from "lucide-react";
 import { dateFormater } from "../../utils/dateFormater";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 export default function WorkspaceCard({ workspace }) {
   const {
     name,

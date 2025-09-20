@@ -50,6 +50,7 @@ const Workspace = () => {
   return (
     <>
       {/* Header */}
+      
       <div className="mb-5 flex items-center justify-between flex-wrap gap-3">
         <div className="space-y-2">
           <h2 className="text-xl font-semibold bg-gradient text-transparent bg-clip-text sm:text-2xl mb-2">

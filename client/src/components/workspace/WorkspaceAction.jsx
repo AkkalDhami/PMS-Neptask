@@ -17,7 +17,6 @@ const WorkspaceAction = ({
   const [updateWorkspace, { error: updateError }] =
     useUpdateWorkspaceMutation();
   const { data: orgData, error: orgError } = useGetAllOrgsQuery();
-  console.log(orgData);
   if (error) {
     console.log(error);
     toast.error(error?.error || error?.data?.message || "Something went wrong");
