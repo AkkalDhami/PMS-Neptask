@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -6,6 +6,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
+  CardAction,
   CardTitle,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,6 +27,8 @@ import {
   Eye,
   User,
   CirclePlus,
+  Briefcase,
+  RefreshCw,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -34,10 +37,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import AddOrgModal from "../../components/org/AddOrgModal";
 import {
   useDeleteOrgMutation,
   useLazyGetOrgQuery,
+  useRecoverOrgMutation,
+  useUpdateOrgMutation,
 } from "../../features/org/orgApi";
 import toast from "react-hot-toast";
 import { dateFormater } from "../../utils/dateFormater";
@@ -46,17 +52,33 @@ import InviteMemberForm, {
   InviteMemberForm2,
 } from "../../components/org/InviteMemberForm";
 import { useSendInvitationMutation } from "../../features/invite/inviteApi";
+import OrgMembercard from "../../components/org/OrgMembercard";
+import OrganizationDeletionDialog from "../../components/org/DeleteOrgDailog";
+import OrgAlert from "../../components/org/OrgAlert";
+import OrgStatCard from "../../components/org/OrgStatCard";
+import WorkspaceForm from "../../components/workspace/WorkspaceForm";
+import WorkspaceAction from "../../components/workspace/WorkspaceAction";
+import WorkspaceCard from "../../components/workspace/WorkspaceCard";
 
 const OrgDetails = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const [sendInvitation, { error: inviteError }] = useSendInvitationMutation();
+  const [sendInvitation, { isError: isInviteError, error: inviteError }] =
+    useSendInvitationMutation();
   const { orgId } = params;
+
+  const [updateOrg] = useUpdateOrgMutation();
 
   const [trigger, { isLoading, data, error }] = useLazyGetOrgQuery();
 
-  const [deleteOrg, { isLoading: isDeleting, error: deleteOrgError }] =
+  const [deleteOrg, { isError: isDeleteOrgError, error: deleteOrgError }] =
     useDeleteOrgMutation();
+
+  const [recoverOrg, { isError: isRecoverOrgError, error: recoverOrgError }] =
+    useRecoverOrgMutation();
+
+  const [open, setOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (orgId) {
@@ -64,24 +86,29 @@ const OrgDetails = () => {
     }
   }, [orgId, trigger]);
 
-  useEffect(() => {
-    if (error) {
-      toast.error(
-        error?.data?.message || error?.error || "Something went wrong"
-      );
-    }
-  }, [error]);
 
   const organization = data?.org;
+  console.log(organization?.workspaces);
 
-  const handleOrganizationUpdate = (updatedData) => {
+  const handleOrganizationUpdate = async (updatedData) => {
     console.log(updatedData);
+    setIsDialogOpen(true);
+    try {
+      const res = await updateOrg({ orgId, data: updatedData }).unwrap();
+      console.log(res);
+      toast.success(res?.message);
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.error || error?.data?.message);
+      setIsDialogOpen(false);
+    }
   };
 
-  const onDelete = async (id) => {
+  const onDeletionUpdate = async (id) => {
     console.log(id);
     try {
-      const res = await deleteOrg(id).unwrap();
+      const res = await deleteOrg({ orgId }).unwrap();
       if (!res?.success) return toast.error(res?.message);
       toast.success(res?.message);
       navigate("/organization");
@@ -91,21 +118,15 @@ const OrgDetails = () => {
     }
   };
 
-  // Function to get role badge variant
-  const getRoleVariant = (role) => {
-    switch (role) {
-      case "owner":
-        return "bg-orange-500 text-white";
-      case "admin":
-        return "bg-blue-500 text-white";
-      case "member":
-        return "bg-green-500 text-white";
-      case "viewer":
-        return "bg-zinc-500 text-white";
-      case "guest":
-        return "bg-gray-500 text-white";
-      default:
-        return "bg-gray-500 text-white";
+  console.log("recoverOrgError:", recoverOrgError);
+  const onRecoveryUpdate = async () => {
+    try {
+      const res = await recoverOrg({ orgId }).unwrap();
+      if (!res?.success) return toast.error(res?.message);
+      toast.success(res?.message);
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.error || error?.data?.message);
     }
   };
 
@@ -127,29 +148,39 @@ const OrgDetails = () => {
   const handleInvitationMember = async (data) => {
     try {
       console.log(data);
-      const res = await sendInvitation({ data, orgId }).unwrap()
+      setOpen(true);
+      const res = await sendInvitation({ data, orgId }).unwrap();
       console.log(res);
       if (!res?.success) return toast.error(res?.message);
       toast.success(res?.message);
+      setOpen(false);
     } catch (error) {
       toast.error(error?.error || error?.data?.message || error?.message);
       console.error(error);
     }
   };
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading)
+    return (
+      <div className="container mx-auto p-6 min-h-screen w-full flex items-center justify-center h-64">
+        <div className="flex flex-col items-center">
+          <RefreshCw className="h-8 w-8 animate-spin mb-4" />
+          <p className="text-2xl bg-gradient text-transparent bg-clip-text font-medium">
+            Loading organization data...
+          </p>
+        </div>
+      </div>
+    );
   if (!data) return <div>No organization found</div>;
 
-  if (inviteError) {
-    toast.error(inviteError.error?.message || inviteError?.error)
-  }
-  if (deleteOrgError) {
-    toast.error(deleteOrgError.error || deleteOrgError?.error?.message);
-  }
+
+
 
   return (
     <div className="container mx-auto py-6 space-y-6">
+      {organization?.isDeleted ? <OrgAlert org={organization} /> : null}
+
       {/* Header Section */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-3 items-center justify-between">
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16 rounded-md">
             <AvatarImage
@@ -172,6 +203,8 @@ const OrgDetails = () => {
         </div>
         <div className="flex items-center gap-2">
           <AddOrgModal
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
             initialData={organization}
             onsubmit={handleOrganizationUpdate}
           />
@@ -184,9 +217,6 @@ const OrgDetails = () => {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Export Data</DropdownMenuItem>
               <DropdownMenuItem>Billing Settings</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
-                Delete Organization
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -194,67 +224,37 @@ const OrgDetails = () => {
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">
-              Subscription Plan
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <Badge variant={getPlanVariant(organization.subscription.plan)}>
-                {organization.subscription.plan.toUpperCase()}
-              </Badge>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Renewal: {dateFormater(organization.subscription.renewalDate)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold">
-                {organization.members.length}
-              </span>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Across all workspaces
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Workspaces</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold">
-                {organization.workspaces.length}
-              </span>
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Active workspaces
-            </p>
-          </CardContent>
-        </Card>
+        <OrgStatCard
+          title={"Subscription Plan"}
+          description={`Renewal: ${dateFormater(
+            organization?.subscription.renewalDate
+          )}`}
+          stat={organization?.subscription.plan.toUpperCase()}
+          icon={<CreditCard className="h-4 w-4 text-muted-foreground" />}
+        />
+        <OrgStatCard
+          title={"Members"}
+          description={`Across all organizations`}
+          stat={organization?.members.length}
+          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+        />
+        <OrgStatCard
+          title={"Workspaces"}
+          description={`Active workspaces`}
+          stat={organization?.workspaces.length}
+          icon={<Briefcase className="h-4 w-4 text-muted-foreground" />}
+        />
       </div>
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="members" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:grid-cols-4">
+        <TabsList className="grid w-full  grid-cols-4 mb-2 overflow-x-auto">
           <TabsTrigger value="members">
             <Users className="h-4 w-4 mr-2" />
             Members
           </TabsTrigger>
           <TabsTrigger value="workspaces">
-            <Building2 className="h-4 w-4 mr-2" />
+            <Briefcase className="h-4 w-4 mr-2" />
             Workspaces
           </TabsTrigger>
           <TabsTrigger value="subscription">
@@ -278,9 +278,9 @@ const OrgDetails = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
+                <div className="flex  flex-wrap gap-2.5 justify-between items-center">
                   <div className="relative w-64">
-                    <input
+                    <Input
                       type="text"
                       placeholder="Search members..."
                       className="w-full pl-8 pr-4 py-2 border rounded-md"
@@ -289,60 +289,21 @@ const OrgDetails = () => {
                   </div>
 
                   <InviteMemberForm
+                    open={open}
+                    setOpen={setOpen}
                     onInvite={handleInvitationMember}
-                    organizationId={organization._id}
                   />
-                  {/* <InviteMemberForm2 organizationId={organization._id} /> */}
                 </div>
 
                 <Separator />
 
                 <div className="space-y-4">
                   {organization?.members?.map((member) => (
-                    <div
-                      key={member?.user._id}
-                      className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <Avatar>
-                          <AvatarImage
-                            src={member?.user?.avatar?.url}
-                            alt={member?.user?.name}
-                          />
-                          <AvatarFallback>
-                            {member?.user?.name?.charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{member?.user?.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {member?.user?.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={getRoleVariant(member.role)}>
-                          {member.role.charAt(0).toUpperCase() +
-                            member.role.slice(1)}
-                        </Badge>
-                        <p className="text-sm text-muted-foreground">
-                          Joined Date: {dateFormater(member.joinedAt)}
-                        </p>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Change Role</DropdownMenuItem>
-                            <DropdownMenuItem>View Profile</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              Remove Member
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
+                    <OrgMembercard
+                      orgId={organization?._id}
+                      member={member}
+                      key={member._id}
+                    />
                   ))}
                 </div>
               </div>
@@ -358,51 +319,17 @@ const OrgDetails = () => {
               <CardDescription>
                 All workspaces belonging to this organization.
               </CardDescription>
+              <CardAction>
+                <WorkspaceAction orgId={organization._id} />
+              </CardAction>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {organization.workspaces.map((workspace) => (
-                  <Card key={workspace._id} className="overflow-hidden">
-                    <div className="h-32 bg-muted"></div>
-                    <CardHeader>
-                      <CardTitle>{workspace.name}</CardTitle>
-                      <CardDescription>Workspace description</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div className="flex -space-x-2">
-                          {organization.members.slice(0, 3).map((member) => (
-                            <Avatar
-                              key={member.user._id}
-                              className="h-6 w-6 border-2 border-background">
-                              <AvatarImage src={member.user.avatar} />
-                              <AvatarFallback className="text-xs">
-                                {member.user.name.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                          ))}
-                          {organization.members.length > 3 && (
-                            <Avatar className="h-6 w-6 border-2 border-background">
-                              <AvatarFallback className="text-xs">
-                                +{organization.members.length - 3}
-                              </AvatarFallback>
-                            </Avatar>
-                          )}
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <WorkspaceCard workspace={workspace} key={workspace._id} />
                 ))}
-                <Card className="border-dashed flex items-center justify-center h-full min-h-[300px]">
-                  <Button variant="ghost" className="flex flex-col h-auto p-6">
-                    <Plus className="h-8 w-8 mb-2 text-muted-foreground" />
-                    <span>Create New Workspace</span>
-                  </Button>
-                </Card>
+
+                <WorkspaceAction orgId={organization._id} />
               </div>
             </CardContent>
           </Card>
@@ -539,21 +466,25 @@ const OrgDetails = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Danger Zone</h3>
                 <Card className="border-destructive">
-                  <CardHeader className="text-destructive">
-                    <CardTitle>Delete Organization</CardTitle>
-
+                  <CardHeader
+                    className={`${
+                      organization?.isDeleted ? "text-destructive" : ""
+                    }`}>
+                    <CardTitle>
+                      {organization.isDeleted ? "Restore" : "Delete"}{" "}
+                      Organization
+                    </CardTitle>
                     <CardDescription>
-                      Once you delete an organization, there is no going back.
-                      Please be certain.
+                      {organization.isDeleted
+                        ? "Once you restore an organization, it will be available for use. Please be certain."
+                        : " Once you delete an organization, there is no going back. Please be certain."}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <DeleteAlertDialog
-                      triggerText="Delete Org"
-                      isLoading={isDeleting}
-                      title={`Delete ${organization.name}?`}
-                      description="This will permanently remove the organization and all related data."
-                      onConfirm={() => onDelete(organization._id)}
+                    <OrganizationDeletionDialog
+                      onDeletionUpdate={onDeletionUpdate}
+                      organization={organization}
+                      onRecoveryUpdate={onRecoveryUpdate}
                     />
                   </CardContent>
                 </Card>

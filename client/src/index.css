@@ -97,8 +97,8 @@
   --muted-foreground: oklch(0.705 0.015 286.067);
   --accent: oklch(0.28 0.04 260);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(94.172% 0.00646 16.361 / 0.1);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.28 0.04 260);
   --primary-border: oklch(0.65 0.19 41);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.552 0.016 285.938);
@@ -139,4 +139,11 @@ button {
   .bg-gradient {
     @apply bg-gradient-to-r from-orange-600 to-purple-600;
   }
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
