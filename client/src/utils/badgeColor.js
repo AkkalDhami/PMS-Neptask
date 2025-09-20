@@ -48,12 +48,21 @@ export const getProjectStatusBadge = (status) => {
 export const getProjectStatusClassName = (status) => {
     const classname = {
         planning: "dark:bg-slate-800 dark:text-gray-100 bg-gray-100 text-gray-700",
-        pending: "bg-yellow-500/10 text-yello6-800",
+        pending: "bg-yellow-500/10 text-yellow-800",
         "in-progress": "bg-blue-500/10 text-blue-600",
-        review: "bg-purple-500/10 text-purpl6-800",
+        review: "bg-purple-500/10 text-purple-800",
         completed: "bg-green-500/10 text-green-600 border border-green-500/30 hover:border-green-500",
         "on-hold": "bg-orange-500/10 text-orang6-800",
         cancelled: "bg-red-500/10 text-red-860",
     }
     return classname[status]
+}
+
+export const getBoderClassName = (status) => {
+    const classname = {
+        pending: "border-amber-500",
+        "in-progress": "border-blue-500",
+        completed: " border-green-500",
+    }
+    return classname[status];
 }
