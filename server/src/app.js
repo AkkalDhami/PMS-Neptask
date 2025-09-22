@@ -24,7 +24,7 @@ import inviteRouter from './routes/inviteRoutes.js';
 import workspaceRouter from './routes/workspaceRoutes.js';
 import projectRouter from './routes/projectRoutes.js';
 import taskRouter from './routes/taskRoutes.js';
-
+import subtaskRouter from './routes/subtaskRoutes.js';
 const app = express();
 
 // Middleware
@@ -62,9 +62,8 @@ app.use('/api/invite', inviteRouter);
 app.use('/api/org', orgRouter);
 app.use('/api/workspace', workspaceRouter);
 app.use('/api/project', projectRouter);
-app.use('/api/task', taskRouter);
-
-
+app.use('/api/task', taskRouter); 
+app.use('/api/task/subtask', subtaskRouter); 
 
 
 
@@ -80,15 +79,6 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 
-const PORT = process.env.PORT || 4000;
+connectToDatabase();
 
-connectToDatabase()
-    .then(() => {
-        app.listen(PORT, () => {
-            console.log(`Server listening on http://localhost:${PORT}`);
-        });
-    })
-    .catch((error) => {
-        console.error('Failed to initialize application:', error);
-        process.exit(1);
-    });
+export default app;
