@@ -30,7 +30,7 @@ const organizationSchema = new mongoose.Schema({
             },
             role: {
                 type: String,
-                enum: ["owner", "manager", "admin", "member", 'viewer', 'guest'],
+                enum: ["owner", "manager", "admin", "member", 'viewer'],
                 default: "member"
             },
             joinedAt: { type: Date, default: Date.now }

@@ -47,6 +47,7 @@ export const createOrg = TryCatch(async (req, res) => {
     res.status(201).json({
         success: true,
         message: "Organization created successfully!",
+        org,
     })
 })
 
@@ -217,14 +218,11 @@ export const recoverOrganization = TryCatch(async (req, res) => {
 
     // Check if user is owner or admin
     const isOwner = organization.owner.toString() === userId.toString();
-    const isAdmin = organization.members.some(m =>
-        m.user.toString() === userId.toString() && ['owner', 'admin'].includes(m.role)
-    );
 
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
         return res.status(403).json({
             success: false,
-            message: 'Only owners and admins can recover organizations'
+            message: 'Only owners can recover organizations'
         });
     }
 
@@ -287,11 +285,26 @@ export const getDeletionStatus = TryCatch(async (req, res) => {
 export const addMember = TryCatch(async (req, res) => {
     const { orgId: id } = req.params;
     const { user, role } = req.body;
+    const userId = req.user._id;
+
+    if (!user || !role) return res.status(401).json({
+        success: false,
+        message: "User and role are required!",
+    });
+
     const org = await Organization.findById(id);
     if (!org) return res.status(401).json({
         success: false,
         message: "Organization not found!",
     });
+
+    const isMember = org.members.find(member => member.user.toString() === user);
+    if (isMember) return res.status(401).json({
+        success: false,
+        message: "User is already a member of this organization!",
+    });
+
+
     org.members.push({ user, role });
     await org.save();
     res.status(200).json({
@@ -309,11 +322,25 @@ export const removeMember = TryCatch(async (req, res) => {
         success: false,
         message: "Organization not found!",
     });
+
+    const isPermitted = org.members.find(member => member.user.toString() === req.user?._id.toString() && ['owner'].includes(member.role));
+    if (!isPermitted) return res.status(401).json({
+        success: false,
+        message: "You are not authorized to remove members!",
+    });
+
     const isOwner = await Organization.findOne({ owner: memberId });
     if (isOwner) return res.status(401).json({
         success: false,
         message: "Owner cannot be removed!",
     });
+
+    const isMember = org.members.find(member => member.user.toString() === memberId);
+    if (!isMember) return res.status(401).json({
+        success: false,
+        message: "Member not found!",
+    });
+
 
     org.members = org.members.filter(member => member.user.toString() !== memberId);
     await org.save();
@@ -389,5 +416,20 @@ export const updateOrg = TryCatch(async (req, res) => {
     res.status(200).json({
         success: true,
         message: "Organization updated successfully!",
+    })
+});
+
+//? GET MEMBERS
+export const getMembers = TryCatch(async (req, res) => {
+    const { orgId: id } = req.params;
+    console.log(id);
+    const org = await Organization.findById(id).populate("members.user", "name email _id avatar");
+    if (!org) return res.status(401).json({
+        success: false,
+        message: "Organization not found!",
+    });
+    res.status(200).json({
+        success: true,
+        members: org.members,
     })
 });
