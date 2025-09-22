@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
     refreshToken: { type: String },
     role: {
         type: String,
-        enum: ['admin', 'member', 'viewer', 'manager', 'guest'],
+        enum: ['super-admin', 'owner', 'admin', 'member', 'viewer', 'manager'],
         default: "member",
     },
 

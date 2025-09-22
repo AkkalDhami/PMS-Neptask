@@ -92,5 +92,6 @@ taskSchema.pre("findOneAndDelete", async function (next) {
     }
 });
 
+
 const Task = mongoose.model("Task", taskSchema);
 export default Task;

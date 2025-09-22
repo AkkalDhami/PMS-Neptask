@@ -87,9 +87,6 @@ export const getTasksByProjectId = TryCatch(async (req, res) => {
         return res.status(400).json({ success: false, message: "Invalid projectId" });
     }
 
-    // --------------------
-    // Build base query
-    // --------------------
     const baseMatch = { project: new mongoose.Types.ObjectId(projectId), isActive: true };
 
     if (status && ["pending", "completed", "in-progress"].includes(status.toLowerCase())) {
@@ -97,7 +94,7 @@ export const getTasksByProjectId = TryCatch(async (req, res) => {
     }
 
     if (search) {
-        baseMatch.name = { $regex: search, $options: "i" }; // search by task name (case-insensitive)
+        baseMatch.name = { $regex: search, $options: "i" };
     }
 
     const now = new Date();
@@ -122,17 +119,11 @@ export const getTasksByProjectId = TryCatch(async (req, res) => {
         }
     }
 
-    // --------------------
-    // Sorting
-    // --------------------
     let sortOption = { createdAt: -1 };
     if (sort === "oldest") sortOption = { createdAt: 1 };
     if (sort === "dueDateAsc") sortOption = { dueDate: 1 };
     if (sort === "dueDateDesc") sortOption = { dueDate: -1 };
 
-    // --------------------
-    // Fetch paginated tasks
-    // --------------------
     const tasks = await Task.find(baseMatch)
         .populate("assignedTo", "name email avatar")
         .populate("project", "name")
@@ -142,11 +133,8 @@ export const getTasksByProjectId = TryCatch(async (req, res) => {
 
     const total = await Task.countDocuments(baseMatch);
 
-    // --------------------
-    // Aggregated counts
-    // --------------------
     const countsAgg = await Task.aggregate([
-        { $match: { project: new mongoose.Types.ObjectId(projectId), isActive: true } }, // all tasks in project
+        { $match: { project: new mongoose.Types.ObjectId(projectId), isActive: true } },
         {
             $facet: {
                 all: [{ $count: "count" }],
@@ -180,9 +168,7 @@ export const getTasksByProjectId = TryCatch(async (req, res) => {
         withoutSubtask: formatCounts("withoutSubtask"),
     };
 
-    // --------------------
-    // Send response
-    // --------------------
+
     res.status(200).json({
         success: true,
         data: {
@@ -211,6 +197,28 @@ export const deleteTask = TryCatch(async (req, res) => {
         });
     }
 
+    const isActive = isTask?.project?.isActive
+    if (!isActive) return res.status(403).json({
+        success: false,
+        message: 'This project has been locked'
+    })
+
+    const userId = req.user._id;
+
+    const userIsReporter = String(isTask.reporter) === String(userId);
+    const userIsProjectAdmin = await Project.exists({
+        _id: isTask.project._id,
+        'members.user': userId,
+        'members.role': { $in: ['owner', 'admin'] }
+    });
+
+    if (!userIsReporter && !userIsProjectAdmin) {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. You do not have permission to delete this task.'
+        });
+    }
+
     const task = await Task.findOne({
         _id: taskId,
         $or: [
@@ -236,9 +244,8 @@ export const deleteTask = TryCatch(async (req, res) => {
     }
 
 
-    // Delete the task
     const deletedTask = await Task.findOneAndDelete({ _id: taskId });
-    console.log(isTask?.project);
+
     isTask.project.calculateProgress();
     res.json({
         success: true,
@@ -306,144 +313,6 @@ export const updateTask = TryCatch(async (req, res) => {
 });
 
 
-// Add note to task
-export const addNote = async (req, res) => {
-    try {
-        const { taskId } = req.params;
-
-        // Check if task exists and user has access
-        const task = await Task.findOne({
-            _id: taskId,
-            $or: [
-                { reporter: req.user._id },
-                { assignedTo: req.user._id },
-                {
-                    project: {
-                        $in: await Project.find({
-                            $or: [
-                                { createdBy: req.user._id },
-                                { 'members.user': req.user._id }
-                            ]
-                        }).distinct('_id')
-                    }
-                }
-            ]
-        });
-
-        if (!task) {
-            return res.status(404).json({
-                success: false,
-                message: 'Task not found or access denied'
-            });
-        }
-
-        // Validate note data
-        const validatedData = noteSchema.parse(req.body);
-
-        // Create note
-        const note = new Note({
-            ...validatedData,
-            task: taskId
-        });
-
-        await note.save();
-
-        // Add note to task
-        task.notes.push(note._id);
-        await task.save();
-
-        res.status(201).json({
-            success: true,
-            message: 'Note added successfully',
-            data: note
-        });
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation failed',
-                errors: error.errors
-            });
-        }
-
-        console.error('Error adding note:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
-};
-
-// Add subtask to task
-export const addSubtask = async (req, res) => {
-    try {
-        const { taskId } = req.params;
-
-        // Check if task exists and user has access
-        const task = await Task.findOne({
-            _id: taskId,
-            $or: [
-                { reporter: req.user._id },
-                { assignedTo: req.user._id },
-                {
-                    project: {
-                        $in: await Project.find({
-                            $or: [
-                                { createdBy: req.user._id },
-                                { 'members.user': req.user._id }
-                            ]
-                        }).distinct('_id')
-                    }
-                }
-            ]
-        });
-
-        if (!task) {
-            return res.status(404).json({
-                success: false,
-                message: 'Task not found or access denied'
-            });
-        }
-
-        // Validate subtask data
-        const validatedData = subtaskSchema.parse(req.body);
-
-        // Create subtask
-        const subtask = new Subtask({
-            ...validatedData,
-            task: taskId
-        });
-
-        await subtask.save();
-
-        // Add subtask to task
-        task.subtasks.push(subtask._id);
-        await task.save();
-
-        res.status(201).json({
-            success: true,
-            message: 'Subtask added successfully',
-            data: subtask
-        });
-
-    } catch (error) {
-        if (error instanceof z.ZodError) {
-            return res.status(400).json({
-                success: false,
-                message: 'Validation failed',
-                errors: error.errors
-            });
-        }
-
-        console.error('Error adding subtask:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
-};
-
 //? UPDATE TASK STATUS
 export const updateTaskStatus = TryCatch(async (req, res) => {
     const userId = req?.user?._id;
@@ -464,6 +333,20 @@ export const updateTaskStatus = TryCatch(async (req, res) => {
     }
 
     const prevStatus = isTask.status;
+    if (prevStatus === status) {
+        return res.status(200).json({
+            success: true,
+            message: `Task status is already ${status}`,
+        });
+    }
+
+    const isAssignedToMe = String(isTask.assignedTo) === String(userId);
+    if (!isAssignedToMe) {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. This task is not assigned to you.'
+        });
+    }
 
     const task = await Task.findOneAndUpdate(
         {
@@ -518,64 +401,58 @@ export const updateTaskStatus = TryCatch(async (req, res) => {
 
 // Get user's tasks
 export const getUserTasks = async (req, res) => {
-    try {
-        const { status, priority, page = 1, limit = 10 } = req.query;
-        // const userId = req.user._id;
 
-        // Build filter
-        const filter = {
-            $or: [
-                { assignedTo: userId },
-                { reporter: userId },
-                {
-                    project: {
-                        $in: await Project.find({
-                            $or: [
-                                { createdBy: userId },
-                                { 'members.user': userId }
-                            ]
-                        }).distinct('_id')
-                    }
+    const { status, priority, page = 1, limit = 10 } = req.query;
+    // const userId = req.user._id;
+
+    // Build filter
+    const filter = {
+        $or: [
+            { assignedTo: userId },
+            { reporter: userId },
+            {
+                project: {
+                    $in: await Project.find({
+                        $or: [
+                            { createdBy: userId },
+                            { 'members.user': userId }
+                        ]
+                    }).distinct('_id')
                 }
-            ]
-        };
-
-        if (status) filter.status = status;
-        if (priority) filter.priority = priority;
-
-        // Pagination
-        const skip = (page - 1) * limit;
-
-        const tasks = await Task.find(filter)
-            .populate('assignedTo', 'name email avatar')
-            .populate('reporter', 'name email')
-            .populate('project', 'name')
-            .populate('subtasks')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
-
-        const total = await Task.countDocuments(filter);
-
-        res.json({
-            success: true,
-            data: tasks,
-            pagination: {
-                page: parseInt(page),
-                limit: parseInt(limit),
-                total,
-                pages: Math.ceil(total / limit)
             }
-        });
+        ]
+    };
 
-    } catch (error) {
-        console.error('Error fetching user tasks:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
+    if (status) filter.status = status;
+    if (priority) filter.priority = priority;
+
+    // Pagination
+    const skip = (page - 1) * limit;
+
+    const tasks = await Task.find(filter)
+        .populate('assignedTo', 'name email avatar')
+        .populate('reporter', 'name email')
+        .populate('project', 'name')
+        .populate('subtasks')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit));
+
+    const total = await Task.countDocuments(filter);
+
+    res.json({
+        success: true,
+        data: tasks,
+        pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / limit)
+        }
+    });
+
 };
+
 
 //? SEND OVERDUE EMAIL
 export const sendOverdueEmail = async (user, task) => {
