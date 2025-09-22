@@ -72,6 +72,10 @@ const orgApi = createApi({
             invalidatesTags: ['Org']
         }),
 
+        getMembers: builder.query({
+            query: (orgId) => `/${orgId}/members`,
+            // providesTags: ['Org']
+        }),
     })
 });
 
@@ -83,7 +87,8 @@ export const {
     useUpdateOrgMutation,
     useRemoveMemberMutation,
     useUpdateMemberRoleMutation,
-    useRecoverOrgMutation
+    useRecoverOrgMutation,
+    useGetMembersQuery,
 } = orgApi;
 
 export default orgApi;

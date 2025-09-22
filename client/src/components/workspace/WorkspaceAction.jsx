@@ -13,17 +13,11 @@ const WorkspaceAction = ({
   initialData = null,
   workspaceId = null,
 }) => {
-  const [createWorkspace, { error }] = useCreateWorkspaceMutation();
-  const [updateWorkspace, { error: updateError }] =
-    useUpdateWorkspaceMutation();
-  const { data: orgData, error: orgError } = useGetAllOrgsQuery();
-  if (error) {
-    console.log(error);
-    toast.error(error?.error || error?.data?.message || "Something went wrong");
-  }
+  const [createWorkspace] = useCreateWorkspaceMutation();
+  const [updateWorkspace] = useUpdateWorkspaceMutation();
+  const { data: orgData } = useGetAllOrgsQuery();
 
   const submitHandler = async ({ data, isUpdate }) => {
-    console.log(data, isUpdate);
     let res;
     try {
       if (isUpdate) {
@@ -31,7 +25,6 @@ const WorkspaceAction = ({
           workspaceId,
           data,
         }).unwrap();
-        console.log(res);
         return;
       } else {
         res = await createWorkspace({
@@ -39,18 +32,12 @@ const WorkspaceAction = ({
           data,
         }).unwrap();
       }
-      console.log(res);
       toast.success(res?.message);
     } catch (err) {
       console.log(err);
       toast.error(err?.error || err?.data?.message || "Something went wrong");
     }
   };
-
-  if (orgError) toast.error(orgError?.error || orgError?.data?.message);
-
-  if (updateError)
-    toast.error(updateError?.error || updateError?.data?.message);
 
   return (
     <WorkspaceForm

@@ -12,9 +12,29 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getRoleBadgeColor } from "../../utils/badgeColor";
 import { dateFormater } from "../../utils/dateFormater";
-import { AddMemberDialog } from "../admin/Form";
+import AddMembersModal from "../admin/AddMembersModal";
+import { useGetMembersQuery } from "../../features/org/orgApi";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useAddMembersMutation } from "../../features/workspace/workspaceApi";
 
-const WorkspaceMembers = ({ members }) => {
+const WorkspaceMembers = ({ orgId, workspaceMembers = [] }) => {
+  const params = useParams();
+  const { workspaceId } = params;
+  const { data } = useGetMembersQuery(orgId);
+  const [addMembers] = useAddMembersMutation();
+  const members = data?.members || [];
+
+  const handleAddMembers = async (members) => {
+    try {
+      const res = await addMembers({ workspaceId, members }).unwrap();
+
+      toast.success(res.message || "Members added successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || error?.error || "Failed to add members");
+      console.error(error);
+    }
+  };
 
   return (
     <Card>
@@ -24,13 +44,17 @@ const WorkspaceMembers = ({ members }) => {
           Manage members and their permissions in this workspace
         </CardDescription>
         <CardAction>
-          <AddMemberDialog users={members} />
+          <AddMembersModal
+            onAddMembers={handleAddMembers}
+            workspaceId={workspaceId}
+            availableMembers={members}
+          />
         </CardAction>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           <div className="border rounded-lg divide-y">
-            {members.map((member) => (
+            {workspaceMembers.map((member) => (
               <div
                 key={member._id}
                 className="flex items-center justify-between p-4">
@@ -40,7 +64,7 @@ const WorkspaceMembers = ({ members }) => {
                       src={member.user.avatar}
                       alt={member.user.name}
                     />
-                    <AvatarFallback>
+                    <AvatarFallback className="text-sm font-medium ">
                       {member.user.name
                         .split(" ")
                         .map((n) => n[0])

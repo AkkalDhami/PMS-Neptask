@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import WorkspaceAction from "./WorkspaceAction";
 const WorkspaceSetting = ({ workspace }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
@@ -48,45 +49,56 @@ const WorkspaceSetting = ({ workspace }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <>
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Danger Zone</h3>
-
-              <div className="flex flex-col sm:flex-row items-start justify-between p-4 border border-destructive rounded-lg">
-                <div className="space-y-1">
-                  <h4 className="font-medium text-destructive">
-                    {workspace?.isDeleted
-                      ? "Recover this workspace"
-                      : "Delete this workspace"}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {workspace?.isDeleted
-                      ? "Once you recover a workspace, you can continue to use it."
-                      : "Once you delete a workspace, there is no going back.  Please be certain."}
-                  </p>
-                </div>
-                {workspace?.isDeleted ? (
-                  <Button
-                    variant="destructive"
-                    className="mt-4 sm:mt-0"
-                    onClick={() => handleRecoverWorkspace()}>
-                    <RefreshCw className="mr-2 h-4 w-4" /> Recover Workspace
-                  </Button>
-                ) : (
-                  <Button
-                    variant="destructive"
-                    className="mt-4 sm:mt-0"
-                    onClick={() => setIsDeleting(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
-                  </Button>
-                )}
-              </div>
+          {/* update workspace */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Update Workspace</h3>
+            <p>Update the workspace name and description here.</p>
+            <div className="flex space-x-2">
+              <WorkspaceAction
+                workspaceId={workspace._id}
+                fromWorkspace={false}
+                initialData={workspace}
+                orgId={workspace.organization._id}
+              />
             </div>
-            <Separator />
-          </>
+          </div>
+
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Danger Zone</h3>
+
+            <div className="flex flex-col sm:flex-row items-start justify-between p-4 border border-destructive rounded-lg">
+              <div className="space-y-1">
+                <h4 className="font-medium text-destructive">
+                  {workspace?.isDeleted
+                    ? "Recover this workspace"
+                    : "Delete this workspace"}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {workspace?.isDeleted
+                    ? "Once you recover a workspace, you can continue to use it."
+                    : "Once you delete a workspace, there is no going back.  Please be certain."}
+                </p>
+              </div>
+              {workspace?.isDeleted ? (
+                <Button
+                  variant="destructive"
+                  className="mt-4 sm:mt-0"
+                  onClick={() => handleRecoverWorkspace()}>
+                  <RefreshCw className="mr-2 h-4 w-4" /> Recover Workspace
+                </Button>
+              ) : (
+                <Button
+                  variant="destructive"
+                  className="mt-4 sm:mt-0"
+                  onClick={() => setIsDeleting(true)}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
+                </Button>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
-     
     </>
   );
 };

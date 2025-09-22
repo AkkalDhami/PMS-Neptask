@@ -40,10 +40,8 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
-import WorkspaceAction from "../../components/workspace/WorkspaceAction";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetWorkspaceQuery } from "../../features/workspace/workspaceApi";
-import toast from "react-hot-toast";
 import { dateFormater } from "../../utils/dateFormater";
 import WorkspaceOverview from "../../components/workspace/WorkspaceOverview";
 import WorkspaceMembers from "../../components/workspace/WorkspaceMembers";
@@ -60,7 +58,6 @@ const WorkspaceDetailsPage = () => {
     isLoading: isLoadingWorkspace,
     error: workspaceError,
   } = useGetWorkspaceQuery(workspaceId);
-  console.log(data);
 
   const navigate = useNavigate();
 
@@ -94,7 +91,6 @@ const WorkspaceDetailsPage = () => {
 
   if (workspaceError) {
     console.log(workspaceError);
-    toast.error(workspaceError?.error || workspaceError?.data?.message);
     return (
       <div className="container mx-auto p-6 max-w-6xl">
         <Card>
@@ -102,6 +98,7 @@ const WorkspaceDetailsPage = () => {
             <CardTitle>Error</CardTitle>
             <CardDescription>
               An error occurred while loading the workspace data.
+              {workspaceError?.error || workspaceError?.data?.message}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -128,14 +125,6 @@ const WorkspaceDetailsPage = () => {
             </p>
           </div>
         </div>
-        <div className="flex space-x-2">
-          <WorkspaceAction
-            workspaceId={data?.workspace._id}
-            fromWorkspace={false}
-            initialData={data?.workspace}
-            orgId={data?.workspace.organization._id}
-          />
-        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 sm:gap-4 items-center mb-6">
@@ -146,7 +135,11 @@ const WorkspaceDetailsPage = () => {
           {data?.workspace.isActive ? "Active" : "Inactive"}
         </Badge>
 
-        <div className="flex items-center text-sm text-muted-foreground">
+        <div
+          onClick={() =>
+            navigate(`/organization/${data?.workspace.organization._id}`)
+          }
+          className="flex items-center cursor-pointer text-sm text-muted-foreground hover:text-foreground transition">
           <Building2 className="mr-1 h-4 w-4" />
           <span>{data?.workspace.organization.name}</span>
         </div>
@@ -188,7 +181,7 @@ const WorkspaceDetailsPage = () => {
         </TabsContent>
 
         <TabsContent value="members">
-          <WorkspaceMembers members={data?.workspace?.members} />
+          <WorkspaceMembers workspaceMembers={data?.workspace.members} orgId={data?.workspace.organization._id} />
         </TabsContent>
 
         <TabsContent value="projects">
