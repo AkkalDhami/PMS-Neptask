@@ -23,7 +23,7 @@ export default function DeleteAlertDialog({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="sm">
-          <Trash2 className="h-4 w-4 mr-1" />
+          <Trash2 className="h-4 w-4" />
           {triggerText}
         </Button>
       </AlertDialogTrigger>

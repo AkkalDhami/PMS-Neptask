@@ -24,9 +24,7 @@ const OrgMembercard = ({ member, orgId }) => {
 
   const removeMemberHandler = async ({ memberId }) => {
     try {
-      console.log({ memberId, orgId });
       const res = await removeMember({ memberId, orgId }).unwrap();
-      console.log(res);
       toast.success(res?.message);
     } catch (error) {
       toast.error(error?.message || error?.data?.message);
@@ -40,7 +38,6 @@ const OrgMembercard = ({ member, orgId }) => {
         memberId: member?.user?._id,
         role,
       }).unwrap();
-      console.log(res);
       toast.success(res?.message);
     } catch (error) {
       toast.error(error?.message || error?.data?.message);
@@ -90,7 +87,7 @@ const OrgMembercard = ({ member, orgId }) => {
           </DropdownMenuContent>
         </DropdownMenu>
         <DeleteAlertDialog
-          triggerText="Delete oganization"
+          triggerText=""
           title="Remove member from organization"
           isLoading={isLoading}
           onConfirm={() => removeMemberHandler({ memberId: member?.user?._id })}

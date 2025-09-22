@@ -20,16 +20,14 @@ const Organization = () => {
   console.log(data);
 
   if (error) {
-    toast.error(error?.data?.message || error?.error);
     return <div>Error: {error.error}</div>;
   }
   if (orgCreateError) {
-    toast.error(orgCreateError?.error || orgCreateError?.data?.message);
+    return <div>Error: {error.error}</div>;
   }
   const handleCreateOrganization = async (data) => {
     try {
       const res = await createOrg(data).unwrap();
-      if (!res?.success) return toast.error(res?.message);
       toast.success(res?.message);
       setIsDialogOpen(false);
     } catch (error) {

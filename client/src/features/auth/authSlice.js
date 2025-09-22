@@ -33,16 +33,17 @@ const authSlice = createSlice({
         logout: (state) => {
             state.accessToken = null;
             state.isLoggedIn = false;
-            state.user = {
-                _id: '',
-                name: "",
-                email: "",
-                role: ""
-            }
+            state.user = {}
             localStorage.removeItem('user');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('isLoggedIn');
         },
+        updateUserRole: (state, action) => {
+            state.user.role = action.payload.role;
+            const user = JSON.parse(localStorage.getItem('user'));
+            user.role = action.payload.role;
+            localStorage.setItem('user', JSON.stringify(user));
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -57,5 +58,5 @@ const authSlice = createSlice({
     }
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout , updateUserRole} = authSlice.actions;
 export default authSlice.reducer;

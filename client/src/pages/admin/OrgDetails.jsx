@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,42 +40,26 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import AddOrgModal from "../../components/org/AddOrgModal";
 import {
-  useDeleteOrgMutation,
   useLazyGetOrgQuery,
-  useRecoverOrgMutation,
-  useUpdateOrgMutation,
 } from "../../features/org/orgApi";
 import toast from "react-hot-toast";
 import { dateFormater } from "../../utils/dateFormater";
 import DeleteAlertDialog from "../../components/admin/AlertDailog";
-import InviteMemberForm, {
-  InviteMemberForm2,
-} from "../../components/org/InviteMemberForm";
+import InviteMemberForm from "../../components/org/InviteMemberForm";
 import { useSendInvitationMutation } from "../../features/invite/inviteApi";
 import OrgMembercard from "../../components/org/OrgMembercard";
-import OrganizationDeletionDialog from "../../components/org/DeleteOrgDailog";
 import OrgAlert from "../../components/org/OrgAlert";
 import OrgStatCard from "../../components/org/OrgStatCard";
-import WorkspaceForm from "../../components/workspace/WorkspaceForm";
 import WorkspaceAction from "../../components/workspace/WorkspaceAction";
 import WorkspaceCard from "../../components/workspace/WorkspaceCard";
+import OrgSetting from "../../components/org/OrgSetting";
 
 const OrgDetails = () => {
   const params = useParams();
-  const navigate = useNavigate();
-  const [sendInvitation, { isError: isInviteError, error: inviteError }] =
-    useSendInvitationMutation();
   const { orgId } = params;
+  const [sendInvitation] = useSendInvitationMutation();
 
-  const [updateOrg] = useUpdateOrgMutation();
-
-  const [trigger, { isLoading, data, error }] = useLazyGetOrgQuery();
-
-  const [deleteOrg, { isError: isDeleteOrgError, error: deleteOrgError }] =
-    useDeleteOrgMutation();
-
-  const [recoverOrg, { isError: isRecoverOrgError, error: recoverOrgError }] =
-    useRecoverOrgMutation();
+  const [trigger, { isLoading, data }] = useLazyGetOrgQuery();
 
   const [open, setOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,49 +70,7 @@ const OrgDetails = () => {
     }
   }, [orgId, trigger]);
 
-
   const organization = data?.org;
-  console.log(organization?.workspaces);
-
-  const handleOrganizationUpdate = async (updatedData) => {
-    console.log(updatedData);
-    setIsDialogOpen(true);
-    try {
-      const res = await updateOrg({ orgId, data: updatedData }).unwrap();
-      console.log(res);
-      toast.success(res?.message);
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.error || error?.data?.message);
-      setIsDialogOpen(false);
-    }
-  };
-
-  const onDeletionUpdate = async (id) => {
-    console.log(id);
-    try {
-      const res = await deleteOrg({ orgId }).unwrap();
-      if (!res?.success) return toast.error(res?.message);
-      toast.success(res?.message);
-      navigate("/organization");
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.error || error?.data?.message);
-    }
-  };
-
-  console.log("recoverOrgError:", recoverOrgError);
-  const onRecoveryUpdate = async () => {
-    try {
-      const res = await recoverOrg({ orgId }).unwrap();
-      if (!res?.success) return toast.error(res?.message);
-      toast.success(res?.message);
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.error || error?.data?.message);
-    }
-  };
 
   // Function to get plan badge variant
   const getPlanVariant = (plan) => {
@@ -147,11 +89,8 @@ const OrgDetails = () => {
   // Handle Invitation Member
   const handleInvitationMember = async (data) => {
     try {
-      console.log(data);
       setOpen(true);
       const res = await sendInvitation({ data, orgId }).unwrap();
-      console.log(res);
-      if (!res?.success) return toast.error(res?.message);
       toast.success(res?.message);
       setOpen(false);
     } catch (error) {
@@ -171,9 +110,6 @@ const OrgDetails = () => {
       </div>
     );
   if (!data) return <div>No organization found</div>;
-
-
-
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -202,12 +138,6 @@ const OrgDetails = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <AddOrgModal
-            isDialogOpen={isDialogOpen}
-            setIsDialogOpen={setIsDialogOpen}
-            initialData={organization}
-            onsubmit={handleOrganizationUpdate}
-          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -421,76 +351,7 @@ const OrgDetails = () => {
 
         {/* Settings Tab */}
         <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Settings</CardTitle>
-              <CardDescription>
-                Manage your organization's settings and preferences.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">General Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">
-                      Organization Name
-                    </label>
-                    <p className="text-muted-foreground">{organization.name}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">
-                      Organization Email
-                    </label>
-                    <p className="text-muted-foreground">
-                      {organization.orgEmail}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Created On</label>
-                    <p className="text-muted-foreground">
-                      {dateFormater(organization.createdAt)}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Last Updated</label>
-                    <p className="text-muted-foreground">
-                      {dateFormater(organization.updatedAt)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Danger Zone</h3>
-                <Card className="border-destructive">
-                  <CardHeader
-                    className={`${
-                      organization?.isDeleted ? "text-destructive" : ""
-                    }`}>
-                    <CardTitle>
-                      {organization.isDeleted ? "Restore" : "Delete"}{" "}
-                      Organization
-                    </CardTitle>
-                    <CardDescription>
-                      {organization.isDeleted
-                        ? "Once you restore an organization, it will be available for use. Please be certain."
-                        : " Once you delete an organization, there is no going back. Please be certain."}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <OrganizationDeletionDialog
-                      onDeletionUpdate={onDeletionUpdate}
-                      organization={organization}
-                      onRecoveryUpdate={onRecoveryUpdate}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
+          <OrgSetting organization={organization} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
         </TabsContent>
       </Tabs>
     </div>
