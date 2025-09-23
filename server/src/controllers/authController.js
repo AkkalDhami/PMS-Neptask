@@ -100,6 +100,37 @@ export const loginUser = TryCatch(async (req, res) => {
         message: 'Invalid Credentials'
     })
 
+
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+
+    if (email === superAdminEmail && password === superAdminPassword) {
+        const payload = {
+            _id: 'super-admin',
+            name: 'Super Admin',
+            email,
+            role: 'super-admin'
+        }
+        const accessToken = signAccessToken(payload);
+        const refreshToken = signRefreshToken(payload);
+        await setAuthCookies({ res, accessToken, refreshToken });
+        await User.create({
+            name: 'Super Admin',
+            email,
+            role: 'super-admin'
+        });
+        return res.status(200).json({
+            success: true,
+            message: 'Login Successfull!',
+            refreshToken,
+            accessToken,
+            user: {
+                email,
+                role: 'super-admin'
+            },
+        })
+    }
+
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {

@@ -276,6 +276,13 @@ export const updateTask = TryCatch(async (req, res) => {
         });
     }
 
+    if (!isTask.project?.isActive) {
+        return res.status(401).json({
+            success: false,
+            message: "Project is unlocked. No changes can be made until it is unlocked",
+        });
+    }
+
     const task = await Task.findOneAndUpdate(
         { _id: taskId, $or: [{ reporter: userId }, { assignedTo: userId }] },
         { title, description, dueDate, status, startDate, assignedTo },
@@ -324,13 +331,19 @@ export const updateTaskStatus = TryCatch(async (req, res) => {
         message: "Task Id is required"
     })
 
-    const isTask = await Task.findById(taskId);
+    const isTask = await Task.findById(taskId).populate('project', '_id isActive')
     if (!isTask) {
         return res.status(404).json({
             success: false,
             message: 'Task not found'
         });
     }
+
+    const isActive = isTask?.project?.isActive
+    if (!isActive) return res.status(403).json({
+        success: false,
+        message: 'This project has been locked. No changes can be made until it is unlocked.'
+    })
 
     const prevStatus = isTask.status;
     if (prevStatus === status) {
@@ -379,11 +392,6 @@ export const updateTaskStatus = TryCatch(async (req, res) => {
         });
     }
 
-    const isActive = task?.project?.isActive
-    if (!isActive) return res.status(403).json({
-        success: false,
-        message: 'This project has been locked'
-    })
 
     if (status === 'completed' && !task.completedAt) {
         task.completedAt = new Date();

@@ -14,9 +14,9 @@ export async function authRequired(req, res, next) {
 
             const payload = {
                 _id: user?._id,
-                name: user.name,
-                email: user.email,
-                role: user.role
+                name: user?.name,
+                email: user?.email,
+                role: user?.role
             }
             const accessToken = signAccessToken(payload);
 
