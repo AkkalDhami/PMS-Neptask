@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { updateProjectActive } from "../../../../server/src/controllers/projectController";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -54,7 +55,6 @@ const projectApi = createApi({
             invalidatesTags: [{ type: "Project", id: "LIST" }],
         }),
 
-
         updateProject: builder.mutation({
             query: ({ projectId, data }) => ({
                 url: `/update/${projectId}`,
@@ -66,7 +66,6 @@ const projectApi = createApi({
             ],
         }),
 
-
         deleteProject: builder.mutation({
             query: (projectId) => ({
                 url: `/${projectId}`,
@@ -75,6 +74,17 @@ const projectApi = createApi({
             invalidatesTags: (result, error, projectId) => [
                 { type: "Project", id: projectId },
                 { type: "Project", id: "LIST" },
+            ],
+        }),
+
+        updateProjectActive: builder.mutation({
+            query: ({ projectId, isActive }) => ({
+                url: `/update-active/${projectId}`,
+                method: "PATCH",
+                body: { isActive },
+            }),
+            invalidatesTags: (result, error, { projectId }) => [
+                { type: "Project", id: projectId },
             ],
         }),
     }),
@@ -88,6 +98,7 @@ export const {
     useCreateProjectMutation,
     useUpdateProjectMutation,
     useDeleteProjectMutation,
+    useUpdateProjectActiveMutation
 } = projectApi;
 
 export default projectApi;

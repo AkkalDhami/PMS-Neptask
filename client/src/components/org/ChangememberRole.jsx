@@ -104,20 +104,20 @@ const MemberRoleForm = ({ member, currentUserRole, onRoleUpdate }) => {
         <DialogHeader>
           <DialogTitle>Change Member Role</DialogTitle>
           <DialogDescription>
-            Update the role for {member.user.name} in your organization.
+            Update the role for {member?.user?.name} in your organization.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center gap-3 p-4 border rounded-lg mb-4">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={member.user.avatar} alt={member.user.name} />
+            <AvatarImage src={member?.user?.avatar} alt={member?.user?.name} />
             <AvatarFallback>
-              {member.user.name.charAt(0).toUpperCase()}
+              {member?.user?.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">{member.user.name}</p>
-            <p className="text-sm text-muted-foreground">{member.user.email}</p>
+            <p className="font-medium">{member?.user?.name}</p>
+            <p className="text-sm text-muted-foreground">{member?.user?.email}</p>
             <Badge variant="outline" className="mt-1 capitalize">
               Current: {member.role}
             </Badge>

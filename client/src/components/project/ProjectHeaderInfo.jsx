@@ -12,6 +12,7 @@ import {
   CalendarArrowDown,
   Briefcase,
   Lock,
+  Unlock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -26,27 +27,51 @@ import DeleteAlertDialog from "../admin/AlertDailog";
 import ProjectAction from "./ProjectAction";
 import { statusIcons } from "../../utils/statusIcon";
 
-import { Badge } from '@/components/ui/badge';
-import { getPriorityColor, getProjectStatusBadge } from "../../utils/badgeColor";
+import { Badge } from "@/components/ui/badge";
+import {
+  getPriorityColor,
+  getProjectStatusBadge,
+} from "../../utils/badgeColor";
 import { priorityIcons } from "../../utils/priorityIcon";
+import { useUpdateProjectActiveMutation } from "../../features/project/projectApi";
+import toast from "react-hot-toast";
 
 const ProjectHeaderInfo = ({ project }) => {
+  const [updateProjectActive, { isLoading }] = useUpdateProjectActiveMutation();
+  const handleToggleActive = async () => {
+    if (!project?._id) return;
+    try {
+      const res = await updateProjectActive({
+        projectId: project._id,
+        isActive: { isActive: !project.isActive },
+      }).unwrap();
+      toast.success(res?.message)
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong");
+      console.log(error);
+    }
+  };
   return (
     <>
       <div className="flex items-center justify-between">
         <div className="flex items-center justify-between gap-2">
           <div
             className={`w-10 h-10 rounded-lg flex text-white items-center justify-center`}
-            style={{ backgroundColor: project?.workspace?.color }}>
+            style={{ backgroundColor: project?.workspace?.color }}
+          >
             {project?.name?.charAt(0)?.toUpperCase()}
           </div>
 
           <h1 className="text-3xl capitalize font-bold">{project.name}</h1>
-          {!project?.isActive && (
-            <Lock className="h-6 w-6 text-muted-foreground" />
-          )}
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleToggleActive} disabled={isLoading}>
+            {project?.isActive ? (
+              <Lock className="h-8 w-8 text-foreground" />
+            ) : (
+              <Unlock className="h-8 w-8 text-foreground" />
+            )}
+          </Button>
           <TaskAction />
           <ProjectAction
             initialData={project}
@@ -68,20 +93,23 @@ const ProjectHeaderInfo = ({ project }) => {
         </p>
         <Link
           to={`/workspace/${project?.workspace?._id}`}
-          className="text-foreground flex items-center">
+          className="text-foreground flex items-center"
+        >
           <Briefcase className="h-4 w-4 mr-2" />
           <span>{project?.workspace?.name}</span>
         </Link>
 
         <Badge
           variant="outline"
-          className={`capitalize ${getProjectStatusBadge(project?.status)}`}>
+          className={`capitalize ${getProjectStatusBadge(project?.status)}`}
+        >
           {statusIcons[project?.status]}{" "}
           <span>{project?.status.replace("-", " ")}</span>
         </Badge>
         <Badge
           variant="outline"
-          className={`capitalize ${getPriorityColor(project?.priority)}`}>
+          className={`capitalize ${getPriorityColor(project?.priority)}`}
+        >
           {priorityIcons[project?.priority]} <span>{project?.priority}</span>
         </Badge>
       </div>
