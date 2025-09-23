@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    addMembers,
     createWorkspace,
     getAllWorkspaces,
     getWorkspace,
@@ -17,4 +18,5 @@ router.post('/organization/:orgId/create', authRequired, createWorkspace);
 
 router.put('/:workspaceId', authRequired, updateWorkspace);
 
+router.post('/:workspaceId/members', authRequired, addMembers);
 export default router;

@@ -339,10 +339,10 @@ export const recoverWorkspace = TryCatch(async (req, res) => {
 });
 
 //? ADD MEMBER
-export const addMember = TryCatch(async (req, res) => {
+export const addMembers = TryCatch(async (req, res) => {
     const { workspaceId } = req.params;
-    const { user, role } = req.body;
-
+    const { members } = req.body;
+    console.log(members);
     if (!(workspaceId)) {
         return res.status(400).json({
             success: false,
@@ -371,12 +371,24 @@ export const addMember = TryCatch(async (req, res) => {
         });
     }
 
-    const newMember = {
-        user,
-        role
-    };
 
-    workspace.members.push(newMember);
+
+    // Filter out members who are already in the workspace
+    const newMembers = members.filter(member =>
+        !workspace.members.some(m => m.user.toString() === member.user.toString())
+    );
+
+    console.log(newMembers);
+
+    // Add new members to the workspace
+    for (const memberId of newMembers) {
+        workspace.members.push({
+            user: memberId,
+            role: 'member',
+            joinedAt: new Date()
+        });
+    }
+
     await workspace.save();
 
     res.status(200).json({

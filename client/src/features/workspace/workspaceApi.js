@@ -8,60 +8,64 @@ const workspaceApi = createApi({
         baseUrl: `${BASE_URL}/api/workspace`,
         credentials: "include",
     }),
-    tagTypes: ["Workspace"],
+    tagTypes: ["Workspace", "Org"],
+
     endpoints: (builder) => ({
+        // Get all workspaces with pagination
         getAllWorkspaces: builder.query({
             query: ({ page = 1, limit = 9 }) => `/all?page=${page}&limit=${limit}`,
-            providesTags: (result) =>
-                result?.workspaces
-                    ? [
-                        ...result.workspaces.map((w) => ({
-                            type: "Workspace",
-                            id: w._id,
-                        })),
-                        { type: "Workspace", id: "LIST" },
-                    ]
-                    : [{ type: "Workspace", id: "LIST" }],
+            providesTags: ["Workspace"], // ✅ important for cache invalidation
         }),
 
+        // Get all workspaces (without pagination)
         getWorkspaces: builder.query({
             query: () => `/`,
+            providesTags: ["Workspace"], // ✅ added
         }),
 
+        // Get single workspace
         getWorkspace: builder.query({
             query: (workspaceId) => `/${workspaceId}`,
-            providesTags: (result, error, id) => [{ type: "Workspace", id }],
+            providesTags: ["Workspace"], // ✅ added
         }),
 
+        // Create workspace
         createWorkspace: builder.mutation({
             query: ({ orgId, data }) => ({
                 url: `/organization/${orgId}/create`,
                 method: "POST",
                 body: data,
             }),
-            invalidatesTags: [{ type: "Workspace", id: "LIST" }],
+            invalidatesTags: ["Workspace"],
         }),
 
+        // Update workspace
         updateWorkspace: builder.mutation({
             query: ({ workspaceId, data }) => ({
                 url: `/${workspaceId}`,
                 method: "PUT",
                 body: data,
             }),
-            invalidatesTags: (result, error, { workspaceId }) => [
-                { type: "Workspace", id: workspaceId },
-            ],
+            invalidatesTags: ["Workspace"],
         }),
 
+        // Delete workspace
         deleteWorkspace: builder.mutation({
             query: (workspaceId) => ({
                 url: `/${workspaceId}`,
                 method: "DELETE",
             }),
-            invalidatesTags: (result, error, workspaceId) => [
-                { type: "Workspace", id: workspaceId },
-                { type: "Workspace", id: "LIST" },
-            ],
+            invalidatesTags: ["Workspace"],
+        }),
+
+        // Add members to workspace
+        addMembers: builder.mutation({
+            query: ({ workspaceId, members }) => ({
+                url: `/${workspaceId}/members`,
+                method: "POST",
+                body: { members }, // expects array of { user, role, joinedAt }
+            }),
+            invalidatesTags: ["Workspace", "Org"], // ✅ now safe
         }),
     }),
 });
@@ -73,6 +77,7 @@ export const {
     useCreateWorkspaceMutation,
     useUpdateWorkspaceMutation,
     useDeleteWorkspaceMutation,
+    useAddMembersMutation,
 } = workspaceApi;
 
 export default workspaceApi;

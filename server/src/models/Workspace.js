@@ -39,7 +39,7 @@ const workspaceSchema = new mongoose.Schema({
             },
             role: {
                 type: String,
-                enum: ["owner", "member", "admin", "viewer", "manager", 'guest'],
+                enum: ["owner", "member", "admin", "viewer", "manager"],
                 default: 'member'
             },
             joinedAt: {
@@ -96,12 +96,6 @@ workspaceSchema.pre("findOneAndDelete", async function (next) {
 
     next();
 });
-
-// workspaceSchema.post("save", async function (doc) {
-//     await Organization.findByIdAndUpdate(doc.orgId, {
-//         $addToSet: { workspaces: doc._id } 
-//     });
-// });
 
 const Workspace = mongoose.model("Workspace", workspaceSchema);
 
