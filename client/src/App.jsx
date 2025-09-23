@@ -26,6 +26,8 @@ import WorkspaceDetailsPage from "./pages/admin/WorkspaceDetail";
 import Authlayout from "./components/layout/Authlayout";
 import ProjectDetailsPage from "./pages/admin/ProjectDetail";
 import CreateEditTaskPage from "./pages/admin/TaskCreatepage";
+import TaskDetailPage from "./pages/admin/TaskDetail";
+import WaitingInvite from "./pages/others/WaitingInvite";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -100,6 +102,14 @@ const App = () => {
       element: <AppLayout />,
       children: [
         {
+          path: "/waiting-invite",
+          element: (
+            <ProtectedRoutes>
+              <WaitingInvite />
+            </ProtectedRoutes>
+          ),
+        },
+        {
           path: "/my-profile",
           element: (
             <ProtectedRoutes>
@@ -142,6 +152,11 @@ const App = () => {
         {
           path: "/project/:projectId",
           element: <ProjectDetailsPage />,
+        },
+
+        {
+          path: "/project/:projectId/task/:taskId",
+          element: <TaskDetailPage />,
         },
         {
           path: "/task-create",
