@@ -113,6 +113,7 @@ export const createProject = TryCatch(async (req, res) => {
 export const updateProject = TryCatch(async (req, res) => {
     const { projectId } = req.params;
     const updates = req.body;
+    const userId = req.user._id;
 
     if (!(projectId)) {
         return res.status(400).json({
@@ -129,22 +130,31 @@ export const updateProject = TryCatch(async (req, res) => {
         });
     }
 
-    // Check if user has permission to update (owner or admin)
+    const isMember = project.members.some(member => member.user.toString() === userId.toString());
+    if (!isMember) {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. You are not a member of this project'
+        });
+    }
+
     const userMembership = project.members.find(member =>
-        member.user.toString() === req.user._id.toString()
+        member.user.toString() === userId.toString()
     );
+
+
 
     if (!userMembership || !['owner', 'manager', 'admin'].includes(userMembership.role)) {
         return res.status(403).json({
             success: false,
-            message: 'You do not have permission to update this project'
+            message: 'Access denied. You do not have permission to update this project'
         });
     }
 
     const isActive = project?.isActive
     if (!isActive) return res.status(403).json({
         success: false,
-        message: 'This project has been locked'
+        message: 'Access denied. This project has been locked'
     })
 
     // Update project
@@ -163,6 +173,7 @@ export const updateProject = TryCatch(async (req, res) => {
 //? DELETE PROJECT
 export const deleteProject = TryCatch(async (req, res) => {
     const { projectId } = req.params;
+    const userId = req.user._id;
 
     if (!(projectId)) {
         return res.status(400).json({
@@ -179,15 +190,22 @@ export const deleteProject = TryCatch(async (req, res) => {
         });
     }
 
-    // Check if user has permission to delete (owner or admin)
+    const isMember = project.members.some(member => member.user.toString() === userId.toString());
+    if (!isMember) {
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. You are not a member of this project'
+        });
+    }
+
     const userMembership = project.members.find(member =>
-        member.user.toString() === req.user._id.toString()
+        member.user.toString() === userId.toString()
     );
 
     if (!userMembership || !['owner', 'manager', 'admin'].includes(userMembership.role)) {
         return res.status(403).json({
             success: false,
-            message: 'You do not have permission to delete this project'
+            message: 'Access denied. You do not have permission to delete this project'
         });
     }
 
@@ -527,7 +545,8 @@ export const getProjectStats = TryCatch(async (req, res) => {
 //? UPDATE PROJECT ACTIVE
 export const updateProjectActive = TryCatch(async (req, res) => {
     const { projectId } = req.params;
-    const { isActive } = req.body;
+    const { isActive: { isActive } } = req.body;
+    console.log(isActive)
 
     if (!(projectId)) {
         return res.status(400).json({
@@ -548,7 +567,8 @@ export const updateProjectActive = TryCatch(async (req, res) => {
         member.user.toString() === req.user._id.toString()
     );
 
-    if (!userMembership || !['owner', 'admin'].includes(userMembership.role)) {
+
+    if (!userMembership || !['owner', 'admin', 'manager'].includes(userMembership.role)) {
         return res.status(403).json({
             success: false,
             message: 'You do not have permission to update this project'
@@ -562,6 +582,6 @@ export const updateProjectActive = TryCatch(async (req, res) => {
 
     res.status(200).json({
         success: true,
-        message: 'Project updated successfully'
+        message: `Project ${!project.isActive ? 'locked' : 'unlocked'} successfully`
     });
 });

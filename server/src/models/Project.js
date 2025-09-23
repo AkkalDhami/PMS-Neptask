@@ -30,7 +30,7 @@ const projectSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        lockedBy : {
+        lockedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         },
@@ -160,7 +160,6 @@ projectSchema.methods.calculateProgress = async function () {
         throw new Error("Error calculating progress: " + error.message);
     }
 };
-
 
 const Project = mongoose.model("Project", projectSchema);
 
