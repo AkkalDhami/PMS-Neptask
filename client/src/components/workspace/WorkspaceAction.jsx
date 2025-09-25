@@ -18,21 +18,21 @@ const WorkspaceAction = ({
   const { data: orgData } = useGetAllOrgsQuery();
 
   const submitHandler = async ({ data, isUpdate }) => {
-    let res;
     try {
       if (isUpdate) {
-        res = await updateWorkspace({
+        const res = await updateWorkspace({
           workspaceId,
           data,
         }).unwrap();
+        toast.success(res?.message);
         return;
       } else {
-        res = await createWorkspace({
+        const res = await createWorkspace({
           orgId: orgId || data.organization,
           data,
         }).unwrap();
+        toast.success(res?.message);
       }
-      toast.success(res?.message);
     } catch (err) {
       console.log(err);
       toast.error(err?.error || err?.data?.message || "Something went wrong");

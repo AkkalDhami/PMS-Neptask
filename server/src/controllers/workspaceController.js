@@ -251,7 +251,6 @@ export const requestWorkspaceDeletion = TryCatch(async (req, res) => {
         message: `Workspace deletion scheduled. You have 12 days to recover.`,
     });
 });
-
 export const permanentlyDeleteWorkspace = TryCatch(async (workspaceId) => {
 
     const workspace = await Workspace.findById(workspaceId);
@@ -338,11 +337,11 @@ export const recoverWorkspace = TryCatch(async (req, res) => {
     });
 });
 
-//? ADD MEMBER
+//? ADD MEMBERS
 export const addMembers = TryCatch(async (req, res) => {
     const { workspaceId } = req.params;
     const { members } = req.body;
-    console.log(members);
+    
     if (!(workspaceId)) {
         return res.status(400).json({
             success: false,
@@ -371,20 +370,24 @@ export const addMembers = TryCatch(async (req, res) => {
         });
     }
 
-
-
     // Filter out members who are already in the workspace
     const newMembers = members.filter(member =>
         !workspace.members.some(m => m.user.toString() === member.user.toString())
     );
 
-    console.log(newMembers);
+
+    if (newMembers.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'All provided members are already in the workspace'
+        });
+    }
 
     // Add new members to the workspace
-    for (const memberId of newMembers) {
+    for (const member of newMembers) {
         workspace.members.push({
-            user: memberId,
-            role: 'member',
+            user: member.user,
+            role: member.role,
             joinedAt: new Date()
         });
     }

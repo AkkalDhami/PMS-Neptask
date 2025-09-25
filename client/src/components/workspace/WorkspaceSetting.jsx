@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import WorkspaceAction from "./WorkspaceAction";
+import WorkspaceDeleteDailog from "./WorkspaceDeleteDailog";
 const WorkspaceSetting = ({ workspace }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
@@ -84,16 +85,22 @@ const WorkspaceSetting = ({ workspace }) => {
                 <Button
                   variant="destructive"
                   className="mt-4 sm:mt-0"
-                  onClick={() => handleRecoverWorkspace()}>
+                  onClick={() => handleRecoverWorkspace()}
+                >
                   <RefreshCw className="mr-2 h-4 w-4" /> Recover Workspace
                 </Button>
               ) : (
-                <Button
-                  variant="destructive"
-                  className="mt-4 sm:mt-0"
-                  onClick={() => setIsDeleting(true)}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
-                </Button>
+                <WorkspaceDeleteDailog
+                  workspace={workspace}
+                  onDeletionUpdate={handleDeleteWorkspace}
+                  onRecoveryUpdate={handleRecoverWorkspace}
+                />
+                // <Button
+                //   variant="destructive"
+                //   className="mt-4 sm:mt-0"
+                //   onClick={() => setIsDeleting(true)}>
+                //   <Trash2 className="mr-2 h-4 w-4" /> Delete Workspace
+                // </Button>
               )}
             </div>
           </div>

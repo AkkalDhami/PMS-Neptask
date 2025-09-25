@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,19 +17,20 @@ import { Loader2, Trash2, Undo2, Calendar, ShieldAlert } from "lucide-react";
 import { getDaysRemaining } from "../../utils/getDaysRemaining";
 
 const WorkspaceDeleteDailog = ({
-  organization,
+  workspace = {},
+  loading = false,
   onDeletionUpdate = () => {},
   onRecoveryUpdate = () => {},
-    title = "Delete Organization",
-    description = "Are you sure you want to delete this organization? This action cannot be undone.",
+  title = "Delete workspace",
+  description = "Are you sure you want to delete this workspace? This action cannot be undone.",
 }) => {
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [reason, setReason] = useState("");
   const [confirmation, setConfirmation] = useState("");
 
+  console.log(workspace);
   const handleRequestDeletion = async () => {
-    if (confirmation !== organization.name) {
+    if (confirmation !== workspace.name) {
       return;
     }
 
@@ -40,30 +39,29 @@ const WorkspaceDeleteDailog = ({
   };
 
   const handleRecover = async () => {
-    setLoading(true);
     onRecoveryUpdate();
-    setLoading(false);
     setOpen(false);
   };
 
-  const daysRemaining = getDaysRemaining(organization?.scheduledDeletionAt);
+  const daysRemaining = getDaysRemaining(workspace?.scheduledDeletionAt);
 
-  if (organization.isDeleted) {
+  if (workspace.isDeleted) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 hover:bg-green-700 hover:text-white text-white">
+            className="bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 hover:bg-green-700 hover:text-white text-white"
+          >
             <Undo2 className="h-4 w-4 mr-2" />
-            Recover Organization
+            Recover workspace
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Recover Organization</DialogTitle>
+            <DialogTitle>Recover workspace</DialogTitle>
             <DialogDescription>
-              Restore {organization.name} and cancel the deletion process.
+              Restore {workspace.name} and cancel the deletion process.
             </DialogDescription>
           </DialogHeader>
 
@@ -73,8 +71,7 @@ const WorkspaceDeleteDailog = ({
               Scheduled for Deletion
             </AlertTitle>
             <AlertDescription className="text-amber-700">
-              This organization is scheduled to be deleted in {daysRemaining}{" "}
-              days.
+              This workspace is scheduled to be deleted in {daysRemaining} days.
             </AlertDescription>
           </Alert>
 
@@ -82,13 +79,15 @@ const WorkspaceDeleteDailog = ({
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={loading}>
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button
               onClick={handleRecover}
               disabled={loading}
-              className="bg-green-600 text-white hover:bg-green-700">
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
@@ -107,15 +106,15 @@ const WorkspaceDeleteDailog = ({
       <DialogTrigger asChild>
         <Button variant="destructive">
           <Trash2 className="h-4 w-4 mr-2" />
-          Delete Organization
+          Delete workspace
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Delete Organization</DialogTitle>
+          <DialogTitle>Delete workspace</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. The organization will be scheduled for
-            deletion and permanently removed after 28 days.
+            This action cannot be undone. The workspace will be scheduled for
+            deletion and permanently removed after 12 days.
           </DialogDescription>
         </DialogHeader>
 
@@ -124,7 +123,7 @@ const WorkspaceDeleteDailog = ({
             <Label htmlFor="reason">Reason for deletion (optional)</Label>
             <Textarea
               id="reason"
-              placeholder="Why are you deleting this organization?"
+              placeholder="Why are you deleting this workspace?"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
@@ -133,11 +132,11 @@ const WorkspaceDeleteDailog = ({
 
           <div className="space-y-2">
             <Label htmlFor="confirmation">
-              Type <strong>{organization.name}</strong> to confirm
+              Type <strong>{workspace.name}</strong> to confirm
             </Label>
             <Input
               id="confirmation"
-              placeholder={organization.name}
+              placeholder={workspace.name}
               value={confirmation}
               onChange={(e) => setConfirmation(e.target.value)}
             />
@@ -147,9 +146,8 @@ const WorkspaceDeleteDailog = ({
             <ShieldAlert className="h-4 w-4" />
             <AlertTitle>Warning</AlertTitle>
             <AlertDescription>
-              All workspaces, projects, and data will be permanently deleted
-              after 28 days. You can recover the organization anytime before
-              then.
+              All projects,tasks , and data will be permanently deleted after 28
+              days. You can recover the workspace anytime before then.
             </AlertDescription>
           </Alert>
         </div>
@@ -158,13 +156,15 @@ const WorkspaceDeleteDailog = ({
           <Button
             variant="outline"
             onClick={() => setOpen(false)}
-            disabled={loading}>
+            disabled={loading}
+          >
             Cancel
           </Button>
           <Button
             variant="destructive"
             onClick={handleRequestDeletion}
-            disabled={loading || confirmation !== organization.name}>
+            disabled={loading || confirmation !== workspace.name}
+          >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
             ) : (

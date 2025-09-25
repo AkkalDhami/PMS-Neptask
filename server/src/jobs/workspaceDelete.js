@@ -1,8 +1,8 @@
 import cron from 'node-cron';
 import Workspace from '../models/Workspace.js';
-import { permanentlyDeleteWorkspace } from '../controllers/orgController.js';
-// Run daily at 2 AM
-cron.schedule('0 2 * * *', async () => {
+import { permanentlyDeleteWorkspace } from '../controllers/workspaceController.js';
+
+cron.schedule('0 * * * *', async () => {
     try {
         console.log('Running Workspace cleanup job...');
 
@@ -13,16 +13,16 @@ cron.schedule('0 2 * * *', async () => {
 
         console.log(`Found ${WorkspacesToDelete.length} Workspaces to permanently delete`);
 
-        for (const org of WorkspacesToDelete) {
+        for (const workspace of WorkspacesToDelete) {
             try {
-                const result = await permanentlyDeleteWorkspace(org._id);
+                const result = await permanentlyDeleteWorkspace(workspace._id);
                 if (result.success) {
-                    console.log(`Successfully deleted Workspace: ${org.name}`);
+                    console.log(`Successfully deleted Workspace: ${workspace.name}`);
                 } else {
-                    console.log(`Failed to delete Workspace ${org.name}: ${result.message}`);
+                    console.log(`Failed to delete Workspace ${workspace.name}: ${result.message}`);
                 }
             } catch (error) {
-                console.error(`Error deleting Workspace ${org.name}:`, error);
+                console.error(`Error deleting Workspace ${workspace.name}:`, error);
             }
         }
 

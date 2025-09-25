@@ -56,6 +56,10 @@ const workspaceSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isParmanentlyDeleted: {
+        type: Boolean,
+        default: false
+    },
     deletionRequestedAt: {
         type: Date,
         default: null
