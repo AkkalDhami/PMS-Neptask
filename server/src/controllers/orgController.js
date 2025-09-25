@@ -100,7 +100,7 @@ export const getOrgs = TryCatch(async (req, res) => {
 
 //? GET A ORGANIZATION
 export const getOrg = TryCatch(async (req, res) => {
-    const org = await Organization.findById(req.params.id).populate("owner").populate("owner") // populate organization owner
+    const org = await Organization.findById(req.params.id).populate("owner").populate("owner") 
         .populate("members.user")
         .populate({
             path: "workspaces",

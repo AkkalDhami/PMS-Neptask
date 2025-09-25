@@ -1,84 +1,94 @@
 import mongoose from "mongoose";
 import Workspace from "./Workspace.js";
+import User from "./User.js";
 
-const organizationSchema = new mongoose.Schema({
+const organizationSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
     logo: {
-        url: String,
-        public_id: String,
+      url: String,
+      public_id: String,
     },
     orgEmail: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     owner: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     members: [
-        {
-            user: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User"
-            },
-            role: {
-                type: String,
-                enum: ["owner", "manager", "admin", "member", 'viewer'],
-                default: "member"
-            },
-            joinedAt: { type: Date, default: Date.now }
-        }
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        role: {
+          type: String,
+          enum: ["owner", "manager", "admin", "member", "viewer"],
+          default: "member",
+        },
+        joinedAt: { type: Date, default: Date.now },
+      },
     ],
     subscription: {
-        plan: {
-            type: String,
-            enum: ["free", "pro", "enterprise"],
-            default: "free"
-        },
-        stripeCustomerId: String,
-        renewalDate: Date,
-        isActive: {
-            type: Boolean,
-            default: true
-        }
-    },
-    workspaces: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Workspace"
-    }],
-    isDeleted: {
+      plan: {
+        type: String,
+        enum: ["free", "pro", "enterprise"],
+        default: "free",
+      },
+      stripeCustomerId: String,
+      renewalDate: Date,
+      isActive: {
         type: Boolean,
-        default: false
+        default: true,
+      },
+    },
+    workspaces: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Workspace",
+      },
+    ],
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    isParmanentlyDeleted: {
+      type: Boolean,
+      default: false,
     },
     deletionRequestedAt: {
-        type: Date,
-        default: null
+      type: Date,
+      default: null,
     },
     scheduledDeletionAt: {
-        type: Date,
-        default: null
+      type: Date,
+      default: null,
     },
     deletionReason: {
-        type: String,
-        trim: true,
-        maxlength: 500
+      type: String,
+      trim: true,
+      maxlength: 500,
     },
     deletionRequestedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     recoveredAt: {
-        type: Date,
-        default: null
-    }
-}, { timestamps: true });
+      type: Date,
+      default: null,
+    },
+  },
+  { timestamps: true }
+);
 
 organizationSchema.index({ scheduledDeletionAt: 1 }, { expireAfterSeconds: 0 });
 
@@ -91,14 +101,19 @@ organizationSchema.index({ scheduledDeletionAt: 1 }, { expireAfterSeconds: 0 });
 // });
 
 organizationSchema.pre("findOneAndDelete", async function (next) {
-    const orgId = this.getQuery()._id;
-    if (!orgId) return next();
+  const orgId = this.getQuery()._id;
+  if (!orgId) return next();
 
-    await Workspace.deleteMany({ organization: orgId });
+  await Workspace.deleteMany({ organization: orgId });
 
-    next();
+  await User.updateOne(
+    { organizations: orgId },
+    { $pull: { organizations: orgId } }
+  );
+
+  next();
 });
 
-const Organization = mongoose.model('Organization', organizationSchema);
+const Organization = mongoose.model("Organization", organizationSchema);
 
 export default Organization;

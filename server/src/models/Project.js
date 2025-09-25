@@ -107,6 +107,10 @@ const projectSchema = new mongoose.Schema(
             min: 0,
             max: 100,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );
