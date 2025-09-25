@@ -15,6 +15,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { safeSanitize } from './middlewares/safeSanitize.js';
 import "./configs/google.js";
 import "./jobs/orgCleanup.js";
+import "./jobs/workspaceDelete.js";
 // import "./jobs/taskRemainder.js";
 
 import authRouter from './routes/authRoutes.js';

@@ -14,10 +14,10 @@ export default function SignupPage() {
   const [userId, setUserId] = useState(null);
 
   const handleRegisterUser = async (data) => {
-    console.log(data);
+   
     try {
       const res = await register(data).unwrap();
-      console.log(res);
+
       toast.success(res?.message);
       dispatch(
         setCredentials({
